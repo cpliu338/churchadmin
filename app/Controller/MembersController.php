@@ -21,6 +21,27 @@ class MembersController extends AppController {
 	}
 	
 	function login() {
+		/* cakephp's bug, still uses data['User'][...] even though userModel changed */
+		if ($this->request->is('post')) {
+			$username = $this->data['Member']['nickname'];
+			$password = Security::hash($this->data['Member']['pwd'], 'md5', false);
+	
+			$member = $this->Member->find('first', array('conditions' => array(
+				'nickname' => $username, 'pwd' => $password)));
+			if($member !== false) {
+				$this->Auth->login($member['Member']);
+				//$this->redirect(array('controller'=>'members','action'=>'index','admin'=>true));
+				$redirect = $this->Session->read('Auth.redirect');
+				$this->redirect(substr($redirect,
+					strlen($this->request->base)));
+			}
+			else {
+				$this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
+			}
+		}
+		else {
+			debug($this->request);
+		}
 	}
 /**
  * index method
@@ -134,6 +155,8 @@ class MembersController extends AppController {
 		$options = array('conditions' => array('Member.' . $this->Member->primaryKey => $id));
 		$mem = $this->Member->findById(1);
 		$this->set('member', $mem);//$this->Member->find('first', $options));
+		$this->set('hashed', Security::hash('mathew', 'md5', false));
+		//debug($this->Auth->user());
 	}
 
 /**
@@ -165,6 +188,10 @@ class MembersController extends AppController {
 			throw new NotFoundException(__('Invalid member'));
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
+			// overwrite readonly fields
+			$this->request->data('Member.pwd','123456')->data('Member.name','Tai Man');
+			debug($this->request->data);
+			return;
 			if ($this->Member->save($this->request->data)) {
 				$this->Session->setFlash(__('The member has been saved'));
 				$this->redirect(array('action' => 'index'));

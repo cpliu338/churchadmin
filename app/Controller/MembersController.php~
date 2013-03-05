@@ -13,8 +13,15 @@ class MembersController extends AppController {
  *
  * @var array
  */
-	public $components = array('Auth');
+	var $components = array('Auth');
 
+	public function beforeFilter() {
+		parent::beforeFilter();
+		$this->Auth->allow('admin_view');
+	}
+	
+	function login() {
+	}
 /**
  * index method
  *
@@ -125,7 +132,8 @@ class MembersController extends AppController {
 			throw new NotFoundException(__('Invalid member'));
 		}
 		$options = array('conditions' => array('Member.' . $this->Member->primaryKey => $id));
-		$this->set('member', $this->Member->find('first', $options));
+		$mem = $this->Member->findById(1);
+		$this->set('member', $mem);//$this->Member->find('first', $options));
 	}
 
 /**
