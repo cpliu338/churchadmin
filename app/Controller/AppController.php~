@@ -36,9 +36,12 @@ class AppController extends Controller {
 		'Session');
 	
 	public function beforeFilter() {
+		// Use MD5 no salt so that members table can be used in different servers
+		Security::setHash('md5');
  		$this->Auth->userModel='Member';
 		$this->Auth->fields = array(
 			'username'=>'nickname','password'=>'pwd');
 		$this->Auth->loginAction = array('admin'=>false,'controller'=>'members','action'=>'login');
+		$this->Auth->loginRedirect = array('admin'=>true,'controller'=>'members','action'=>'index');
 	}
 }

@@ -20,6 +20,11 @@ class MembersController extends AppController {
 		$this->Auth->allow('admin_view');
 	}
 	
+	function logout() {
+		$this->Auth->logout();
+		$this->redirect(array('controller'=>'pages','action'=>'display','home'));
+	}
+	
 	function login() {
 		/* cakephp's bug, still uses data['User'][...] even though userModel changed */
 		if ($this->request->is('post')) {
@@ -40,7 +45,7 @@ class MembersController extends AppController {
 			}
 		}
 		else {
-			debug($this->request);
+//			debug($this->request);
 		}
 	}
 /**
@@ -142,20 +147,42 @@ class MembersController extends AppController {
 	}
 
 /**
- * admin_view method
+ * admin_view method: Used as debug function
  *
  * @throws NotFoundException
  * @param string $id
  * @return void
  */
 	public function admin_view($id = null) {
-		if (!$this->Member->exists($id)) {
-			throw new NotFoundException(__('Invalid member'));
+$help=<<<'HELP'
+/admin/members/view/?, 
+?=request, response
+auth.user, or [default] a session variable
+HELP;
+		if (preg_match('/^[0-9]+$/',$id)) {
+			if (!$this->Member->exists($id)) {
+				throw new NotFoundException(__('Invalid member'));
+			}
+			$options = array('conditions' => array('Member.' . $this->Member->primaryKey => $id));
+			$mem = $this->Member->findById(1);
+			$this->set('value', $mem);//$this->Member->find('first', $options));
 		}
-		$options = array('conditions' => array('Member.' . $this->Member->primaryKey => $id));
-		$mem = $this->Member->findById(1);
-		$this->set('member', $mem);//$this->Member->find('first', $options));
-		$this->set('hashed', Security::hash('mathew', 'md5', false));
+		else {
+			$this->set('value', $help);
+			if ($id=='request') {
+				debug($this->request);
+			}
+			else if ($id=='response') {
+				debug($this->response);
+			}
+			else if ($id=='auth.user') {
+				debug($this->Auth->user());
+			}
+			else {
+				debug($this->Session->read($id));
+			}
+		}
+		//$this->set('value', Security::hash('mathew', 'md5', false));
 		//debug($this->Auth->user());
 	}
 
@@ -178,20 +205,32 @@ class MembersController extends AppController {
 
 /**
  * admin_edit method
+ * Member.print borrowed as 'reset password' selector
  *
  * @throws NotFoundException
  * @param string $id
  * @return void
  */
 	public function admin_edit($id = null) {
-		if (!$this->Member->exists($id)) {
+		$options = array('conditions' => array('Member.' . $this->Member->primaryKey => $id));
+		$member = $this->Member->find('first', $options);
+		if ($this->Member==null) {//->exists($id)) {
 			throw new NotFoundException(__('Invalid member'));
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
 			// overwrite readonly fields
-			$this->request->data('Member.pwd','123456')->data('Member.name','Tai Man');
-			debug($this->request->data);
-			return;
+			$this->request->data('Member.id', $member['Member']['id'])
+				->data('Member.name', $member['Member']['name']);
+			// reset password?
+			if ($this->data['Member']['print']) {
+				// handled by beforeSave $password = Security::hash($this->data['Member']['pwd'], 'md5', false);
+				$this->request->data('Member.pwd', $this->data['Member']['pwd']);
+			}
+			else {
+				unset($this->data['Member']['pwd']);
+			}
+			//debug($this->request->data);
+			//return;
 			if ($this->Member->save($this->request->data)) {
 				$this->Session->setFlash(__('The member has been saved'));
 				$this->redirect(array('action' => 'index'));
@@ -200,7 +239,10 @@ class MembersController extends AppController {
 			}
 		} else {
 			$options = array('conditions' => array('Member.' . $this->Member->primaryKey => $id));
-			$this->request->data = $this->Member->find('first', $options);
+			$this->request->data = $member;
+			// blank password
+			$this->request->data('Member.pwd', '')
+			->data('Member.print','');
 		}
 	}
 

@@ -1,5 +1,5 @@
 <?php
-	echo $member['Member']['nickname'];
-	echo $hashed;	
+	echo $value;	
+	//echo $member['Member']['nickname'];
 ?>
 

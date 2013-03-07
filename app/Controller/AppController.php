@@ -43,5 +43,9 @@ class AppController extends Controller {
 			'username'=>'nickname','password'=>'pwd');
 		$this->Auth->loginAction = array('admin'=>false,'controller'=>'members','action'=>'login');
 		$this->Auth->loginRedirect = array('admin'=>true,'controller'=>'members','action'=>'index');
+		
+		// default title, verbose in title, i18n in header <h2>
+		$this->set('title_for_layout', "{$this->request->action} {$this->request->controller}");
+		
 	}
 }
