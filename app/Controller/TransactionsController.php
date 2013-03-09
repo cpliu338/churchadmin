@@ -8,8 +8,9 @@ App::uses('AppController', 'Controller');
 class TransactionsController extends AppController {
 	
 	public $paginate = array(
-		'fields' => array('Transaction.id', 'Transaction.tran_id','Transaction.amount','Transaction.detail'),
-        'limit' => 25,
+			'fields' => array('Transaction.id', 'Transaction.tran_id','Transaction.amount','Transaction.detail',
+				'Account.name','Account.name_chi'),
+        'limit' => 2,
         'order' => array(
             'Transaction.date1' => 'asc','Transaction.tran_id' => 'asc'
         )
@@ -22,13 +23,17 @@ class TransactionsController extends AppController {
  */
 	public function index() {
 		$this->paginate = array(
-				'conditions' => array('Transaction.date1 >' => '2012-01-01'),
-				'limit' => 2
+			'fields' => array('Transaction.id', 'Transaction.tran_id','Transaction.amount','Transaction.detail',
+				'Transaction.date1', 'Account.name','Account.name_chi'),
+				'conditions' => array('Transaction.date1 <' => $this->Transaction->getStartDate()),
+				'limit' => 25,
+			'order' => array(
+				'Transaction.date1' => 'asc','Transaction.tran_id' => 'asc')
 			);
-		$this->Transaction->recursive = 0;
+		//$this->Transaction->recursive = 0;
 		$data = $this->paginate('Transaction');
 		$this->set('transactions', $data);
-		debug($data);
+		//debug($data);
 	}
 
 /**

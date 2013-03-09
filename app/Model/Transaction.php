@@ -8,6 +8,17 @@ App::uses('AppModel', 'Model');
  */
 class Transaction extends AppModel {
 
+	const startDateKey = 'Transaction.startDate';
+	
+	public function getStartDate() {
+		App::uses('CakeSession', 'Model/Datasource');
+		if (CakeSession::check(self::startDateKey))
+			return CakeSession::read(self::startDateKey);
+		$startDate = date('Y-m-d');
+		CakeSession::write(self::startDateKey, $startDate);
+		return $startDate;
+	}
+
 /**
  * Display field
  *
