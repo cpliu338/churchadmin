@@ -35,6 +35,11 @@ class AppController extends Controller {
 	var $components = array('Auth',
 		'Session');
 	
+	public function isLevelEnough($lev) {
+		$user = $this->Auth->user();
+		return $user['level']>=$lev;
+	}
+	
 	public function beforeFilter() {
 		// Use MD5 no salt so that members table can be used in different servers
 		Security::setHash('md5');
@@ -47,5 +52,7 @@ class AppController extends Controller {
 		// default title, verbose in title, i18n in header <h2>
 		$this->set('title_for_layout', "{$this->request->action} {$this->request->controller}");
 		
+		// Output toggle admin link if level is enough
+		$this->set('toggle',$this->isLevelEnough(99));
 	}
 }

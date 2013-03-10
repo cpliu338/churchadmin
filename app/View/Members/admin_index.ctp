@@ -1,4 +1,4 @@
-<?php echo $this->element('menu'); ?>
+<?php 	echo $this->element('menu', array('toggle'=>$toggle)); ?>
 <table>
 <?php
 	echo $this->Html->tableHeaders(array('nickname','level',

@@ -10,6 +10,13 @@ class Transaction extends AppModel {
 
 	const startDateKey = 'Transaction.startDate';
 	
+	public function setStartDate($date2) {
+		if (preg_match('/^20[0-4][0-9]-[0-9]{1,2}-[0-9]{1,2}$/', $date2)) {
+			App::uses('CakeSession', 'Model/Datasource');
+			CakeSession::write(self::startDateKey, $date2);
+		}
+	}
+	
 	public function getStartDate() {
 		App::uses('CakeSession', 'Model/Datasource');
 		if (CakeSession::check(self::startDateKey))
@@ -17,6 +24,11 @@ class Transaction extends AppModel {
 		$startDate = date('Y-m-d');
 		CakeSession::write(self::startDateKey, $startDate);
 		return $startDate;
+	}
+	
+	public function getEndDate($d) {
+		//$d = $this->getStartDate(); //e.g. 2013-01-01
+		return substr($d,0,4).'-12-31';
 	}
 
 /**

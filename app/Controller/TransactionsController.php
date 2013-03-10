@@ -22,10 +22,25 @@ class TransactionsController extends AppController {
  * @return void
  */
 	public function index() {
+		$st_date = '';
+		if ($this->request->is('post')) {
+			$st_date = $this->data['Transaction']['date1'];
+			$this->Transaction->setStartDate($st_date);
+			//debug($this->data['Transaction']['date1']);
+		}
+		else {
+			$st_date = $this->Transaction->getStartDate();
+		}
+		$this->request->data['Transaction']['date1'] = $st_date;
+		$end_date = $this->Transaction->getEndDate($st_date);
+		$this->set('end_date',$end_date);
 		$this->paginate = array(
 			'fields' => array('Transaction.id', 'Transaction.tran_id','Transaction.amount','Transaction.detail',
 				'Transaction.date1', 'Account.name','Account.name_chi'),
-				'conditions' => array('Transaction.date1 <' => $this->Transaction->getStartDate()),
+				'conditions' => array(
+					'Transaction.date1 >=' => $st_date,
+					'Transaction.date1 <=' => $end_date
+					),
 				'limit' => 25,
 			'order' => array(
 				'Transaction.date1' => 'asc','Transaction.tran_id' => 'asc')
@@ -33,7 +48,6 @@ class TransactionsController extends AppController {
 		//$this->Transaction->recursive = 0;
 		$data = $this->paginate('Transaction');
 		$this->set('transactions', $data);
-		//debug($data);
 	}
 
 /**
