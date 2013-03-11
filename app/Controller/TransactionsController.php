@@ -7,6 +7,8 @@ App::uses('AppController', 'Controller');
  */
 class TransactionsController extends AppController {
 	
+	public $helpers = array('Js' => array('Jquery'));
+	
 	public $paginate = array(
 			'fields' => array('Transaction.id', 'Transaction.tran_id','Transaction.amount','Transaction.detail',
 				'Account.name','Account.name_chi'),
@@ -131,4 +133,34 @@ class TransactionsController extends AppController {
 		$this->Session->setFlash(__('Transaction was not deleted'));
 		$this->redirect(array('action' => 'index'));
 	}
+	
+	public function admin_index() {
+		$st_date = '';
+		if ($this->request->is('post')) {
+			$st_date = $this->data['Transaction']['date1'];
+			$this->Transaction->setStartDate($st_date);
+			//debug($this->data['Transaction']['date1']);
+		}
+		else {
+			$st_date = $this->Transaction->getStartDate();
+		}
+		$this->request->data['Transaction']['date1'] = $st_date;
+		$end_date = $this->Transaction->getEndDate($st_date);
+		$this->set('end_date',$end_date);
+		$this->paginate = array(
+			'fields' => array('Transaction.id', 'Transaction.tran_id','Transaction.amount','Transaction.detail',
+				'Transaction.date1', 'Account.name','Account.name_chi'),
+				'conditions' => array(
+					'Transaction.date1 >=' => $st_date,
+					'Transaction.date1 <=' => $end_date
+					),
+				'limit' => 25,
+			'order' => array(
+				'Transaction.date1' => 'asc','Transaction.tran_id' => 'asc')
+			);
+		$data = $this->paginate('Transaction');
+		$this->set('transactions', $data);
+	}
+	
 }
+
