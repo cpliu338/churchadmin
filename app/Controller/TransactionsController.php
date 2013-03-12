@@ -136,15 +136,17 @@ class TransactionsController extends AppController {
 	
 	public function admin_index() {
 		$st_date = '';
+		$detail = '';
 		if ($this->request->is('post')) {
 			$st_date = $this->data['Transaction']['date1'];
 			$this->Transaction->setStartDate($st_date);
-			//debug($this->data['Transaction']['date1']);
+			$detail = trim($this->data['Transaction']['detail']);
 		}
 		else {
 			$st_date = $this->Transaction->getStartDate();
 		}
 		$this->request->data['Transaction']['date1'] = $st_date;
+		$this->request->data['Transaction']['detail'] = ' ';
 		$end_date = $this->Transaction->getEndDate($st_date);
 		$this->set('end_date',$end_date);
 		$this->paginate = array(
@@ -152,7 +154,8 @@ class TransactionsController extends AppController {
 				'Transaction.date1', 'Account.name','Account.name_chi'),
 				'conditions' => array(
 					'Transaction.date1 >=' => $st_date,
-					'Transaction.date1 <=' => $end_date
+					'Transaction.date1 <=' => $end_date,
+					'Transaction.detail LIKE' => "%$detail%"
 					),
 				'limit' => 25,
 			'order' => array(
@@ -160,6 +163,9 @@ class TransactionsController extends AppController {
 			);
 		$data = $this->paginate('Transaction');
 		$this->set('transactions', $data);
+		if ($this->request->is('ajax')) {
+			$this->render('admin_edit','ajax');
+		}
 	}
 	
 }
