@@ -15,6 +15,7 @@ SCRIPT;
 		"</form>";
 		//$this->Form->end(__('Change'));
 	echo $this->Html->scriptBlock($script1, array('inline'=>true));
+	echo $this->Paginator->numbers();
 	echo $this->element('entries1', array('transactions'=>$transactions));
 ?>
 

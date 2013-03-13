@@ -137,18 +137,27 @@ class TransactionsController extends AppController {
 	public function admin_index() {
 		$st_date = '';
 		$detail = '';
-		if ($this->request->is('post')) {
+		if ($this->request->is('ajax')) {
+			$st_date = $this->Transaction->getStartDate();
+			$end_date = $this->Transaction->getEndDate($st_date);
+			$detail = $this->Transaction->getDetail();
+		}
+		else if ($this->request->is('post')) {
 			$st_date = $this->data['Transaction']['date1'];
 			$this->Transaction->setStartDate($st_date);
 			$detail = trim($this->data['Transaction']['detail']);
+			$this->Transaction->setDetail($detail);
+			$end_date = $this->Transaction->getEndDate($st_date);
+			$this->set('end_date',$end_date);
 		}
-		else {
+		else { // HTTP GET form
 			$st_date = $this->Transaction->getStartDate();
+			$end_date = $this->Transaction->getEndDate($st_date);
+			$detail = $this->Transaction->getDetail();
+			$this->set('end_date',$end_date);
+			$this->request->data['Transaction']['date1'] = $st_date;
+			$this->request->data['Transaction']['detail'] = $this->Transaction->getDetail();
 		}
-		$this->request->data['Transaction']['date1'] = $st_date;
-		$this->request->data['Transaction']['detail'] = ' ';
-		$end_date = $this->Transaction->getEndDate($st_date);
-		$this->set('end_date',$end_date);
 		$this->paginate = array(
 			'fields' => array('Transaction.id', 'Transaction.tran_id','Transaction.amount','Transaction.detail',
 				'Transaction.date1', 'Account.name','Account.name_chi'),
