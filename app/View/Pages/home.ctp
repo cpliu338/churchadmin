@@ -14,4 +14,5 @@
 <dt>Account.endDate</dt><dd>Account&apos;s entry listing end date (set startDate has side effect to set this too)</dd>
 <dt>Transaction.startDate</dt><dd>Transaction&apos;s entry listing start date</dd>
 <dt>Transaction.createDate</dt><dd>Transaction&apos;s default create date (updated for every add Transaction action)</dd>
+<dt>Transaction.filter</dt><dd>Filter (detail contains) for transactions</dd>
 </dl>

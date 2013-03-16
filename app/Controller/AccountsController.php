@@ -29,15 +29,16 @@ class AccountsController extends AppController {
 			throw new NotFoundException(__('Invalid account'));
 		}
 		$options = array('conditions' => array('Account.' . $this->Account->primaryKey => $id));
-		//$this->set('account', $this->Account->find('first', $options));
-		debug($this->Account->find('first', $options));
+		$account = $this->Account->find('first', $options);
+		$this->set('account', $account);
 		$this->loadModel('Transaction');
 		// no joins needed
-		$this->Transaction->recursive = -1;
-		debug($this->Transaction->find('all', array('limit' => 2, 'conditions'=>array(
-			'Transaction.account_id'=>$id)
+		$this->Transaction->recursive = 0;
+		$pattern = $this->Account->getPatternUnder($account['Account']['code']);
+		$this->set('transactions', $this->Transaction->find('all', array('limit' => 25, 'conditions'=>array(
+			'Account.code LIKE'=>$pattern,
+			'Transaction.date1 >'=>'2012-01-01')
 			)));
-
 	}
 
 /**

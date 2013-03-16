@@ -12,6 +12,14 @@ class Account extends AppModel {
  * @var string
  */
 	public $displayField = 'name';
+	
+	public function getPatternUnder($code) {
+		$c = $code;
+		if (substr($c,-1)=='0') {
+			$c[strlen($c)-1]='%';
+		}
+		return $c;
+	}
 
 /**
  * Validation rules
