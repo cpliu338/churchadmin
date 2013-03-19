@@ -1,0 +1,20 @@
+form#inline div {
+   clear: none;
+   display: inline;
+}
+form#inline div.submit {
+ clear:none;
+ display:inline;
+ margin-left: 10px;
+}
+form#inline input {
+   clear: none;
+   display: inline;
+   padding: 0;
+   width: 100px;
+   font-size: 100%;
+}
+form#inline label {
+   display: inline;
+   font-size: 100%;
+}
