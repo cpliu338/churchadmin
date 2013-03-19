@@ -3,15 +3,17 @@
 ?>
 <table>
 <?php
-	echo
-		$this->Html->tableHeaders(array(__('Date'),__('Ref'),
-		__('Account'),'DB','CR', __('Detail')));
+	echo $this->Html->tableHeaders(array(__('Code'), __('Name'), __('Action')));
 	foreach ($accounts as $account) {
 		$ar = array(
-			$account['Account']['name'],
 			$this->Html->link($account['Account']['code'],
 				array('action'=>'view',$account['Account']['id'])),
-			$account['Account']['name_chi']);
+			$account['Account']['name_chi'] . '(' . $account['Account']['name']. ')',
+                        $this->Html->link(__('Explore'),
+				array('action'=>'index','?'=>
+                                    array('under'=>$account['Account']['code']))
+                        )
+                    );
 		echo $this->Html->tableCells($ar,
 			array('class'=>''),array('class'=>'altrow'));
 	}

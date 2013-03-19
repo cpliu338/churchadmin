@@ -13,8 +13,23 @@ class AccountsController extends AppController {
  * @return void
  */
 	public function index() {
-		$this->Account->recursive = 0;
-		$this->set('accounts', $this->paginate());
+            if (array_key_exists('under', $this->request->query) && !empty($this->request->query['under'])) {
+                $under = $this->request->query['under'];
+                debug($under);
+                if (substr($under, -1)==='0')
+                    $pattern = substr($under, 0, strlen($under)-1) . '%';
+                else
+                    $pattern = $under;
+            }
+            else {
+                $under = '';
+                $pattern = '_0';
+            }
+                debug($pattern);
+            $this->Account->recursive = 0;
+            $this->set('accounts', $this->Account->find('all', array(
+                'conditions' => array('Account.code LIKE'=> $pattern)
+            )));
 	}
 
 /**
