@@ -15,7 +15,6 @@ class AccountsController extends AppController {
 	public function index() {
             if (array_key_exists('under', $this->request->query) && !empty($this->request->query['under'])) {
                 $under = $this->request->query['under'];
-                debug($under);
                 if (substr($under, -1)==='0')
                     $pattern = substr($under, 0, strlen($under)-1) . '%';
                 else
@@ -25,7 +24,6 @@ class AccountsController extends AppController {
                 $under = '';
                 $pattern = '_0';
             }
-                debug($pattern);
             $this->Account->recursive = 0;
             $this->set('accounts', $this->Account->find('all', array(
                 'conditions' => array('Account.code LIKE'=> $pattern)
@@ -40,20 +38,37 @@ class AccountsController extends AppController {
  * @return void
  */
 	public function view($id = null) {
-		if (!$this->Account->exists($id)) {
-			throw new NotFoundException(__('Invalid account'));
-		}
-		$options = array('conditions' => array('Account.' . $this->Account->primaryKey => $id));
-		$account = $this->Account->find('first', $options);
-		$this->set('account', $account);
-		$this->loadModel('Transaction');
-		// no joins needed
-		$this->Transaction->recursive = 0;
-		$pattern = $this->Account->getPatternUnder($account['Account']['code']);
-		$this->set('transactions', $this->Transaction->find('all', array('limit' => 25, 'conditions'=>array(
-			'Account.code LIKE'=>$pattern,
-			'Transaction.date1 >'=>'2012-01-01')
-			)));
+            if (!$this->Account->exists($id)) {
+                    throw new NotFoundException(__('Invalid account'));
+            }
+            $this->loadModel('Transaction');
+            if ($this->request->is('get')) {
+                $date1 = $this->Transaction->getStartDate();
+                $this->request->data('Transaction.date1', $date1);
+            }
+            else {
+                $date1 = $this->request->data('Transaction.date1');
+                $this->Transaction->setStartDate($date1);
+            }
+            $options = array('conditions' => array('Account.' . $this->Account->primaryKey => $id));
+            $account = $this->Account->find('first', $options);
+            $this->set('account', $account);
+            // no joins needed
+            $this->Transaction->recursive = 0;
+            $yearStart = $this->Transaction->getYearStart($date1);
+            $this->set('yearStart',$yearStart);
+            $pattern = $this->Account->getPatternUnder($account['Account']['code']);
+            $this->set('transactions', $this->Transaction->find('all', array('limit' => 25, 'conditions'=>array(
+                    'Account.code LIKE'=>$pattern,
+                    'Transaction.date1 <='=>$this->Transaction->getEndDate($date1),
+                    'Transaction.date1 >='=>$date1),
+                'order'=>array('Transaction.date1')
+                    )));
+            $this->set('broughtForward', $this->Transaction->find('first', array('fields' => 'SUM(amount) AS total', 'conditions' => array(
+                'Account.code LIKE' => $pattern,
+                'Transaction.date1 >' => $yearStart,
+                'Transaction.date1 <' => $date1)
+            )));
 	}
 
 /**
