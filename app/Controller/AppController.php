@@ -34,7 +34,7 @@ App::uses('Controller', 'Controller');
 class AppController extends Controller {
 	var $components = array('Auth',
 		'Session');
-	
+        
 	public function isLevelEnough($lev) {
 		$user = $this->Auth->user();
 		return $user['level']>=$lev;
