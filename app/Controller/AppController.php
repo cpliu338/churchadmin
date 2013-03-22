@@ -35,6 +35,14 @@ class AppController extends Controller {
 	var $components = array('Auth',
 		'Session');
         
+    var $numberOptions = array(
+        'places' => 2,
+        'escape' => false,
+        'before' => '',
+        'decimals' => '.',
+        'thousands' => ','
+    );
+    
 	public function isLevelEnough($lev) {
 		$user = $this->Auth->user();
 		return $user['level']>=$lev;

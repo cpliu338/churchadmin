@@ -7,13 +7,13 @@ App::uses('AppController', 'Controller','Number');
  */
 class OffersController extends AppController {
     
-    var $numberOptions = array(
-        'places' => 2,
-        'escape' => false,
-        'before' => '',
-        'decimals' => '.',
-        'thousands' => ','
-    );
+//    var $numberOptions = array(
+//        'places' => 2,
+//        'escape' => false,
+//        'before' => '',
+//        'decimals' => '.',
+//        'thousands' => ','
+//    );
 
     public function beforeFilter() {
         parent::beforeFilter();

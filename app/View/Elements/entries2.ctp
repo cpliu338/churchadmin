@@ -1,27 +1,33 @@
 <table>
 <?php
+    $this->append('css');
+    echo "<style>.column-4 { text-align:right}</style>";
+    echo "<style>.column-5 { text-align:right}</style>";
+    $this->end();
+
 /**
  * Entries table for bank book like entries
  */
     $factor = (preg_match('/^[2|3|4]/', $account['Account']['code'])) ? 1 : -1;
     $tot = $bftotal * $factor;
     echo $this->Html->tableHeaders(array(__('Date'),__('Ref'),
-        __('Account'),__('Amount'),__('Balance'), __('Detail')));
+        __('Account'),__('Amount'),__('Balance'), __('Detail'), __('Extra')));
     $ar = array('','','','',$tot,__('Brought Forward'));
     echo $this->Html->tableCells($ar,
         array('class'=>''),array('class'=>'altrow'));
-    foreach ($transactions as $transaction) {
-        $tot += $transaction['Transaction']['amount'] * $factor;
+    foreach ($entries as $entry) {
+        $tot += $entry['Entry']['amount'] * $factor;
         $ar = array(
-            $transaction['Transaction']['date1'],
-            $this->Html->link($transaction['Transaction']['tran_id'],
-                array('action'=>'edit',$transaction['Transaction']['id'])),
-            $transaction['Account']['name_chi'],
-            $transaction['Transaction']['amount'] * $factor,
-            $tot,
-            $transaction['Transaction']['detail']);
+            $entry['Entry']['date1'],
+            $this->Html->link($entry['Entry']['transref'],
+                array('controller'=>'entries','action'=>'edit',$entry['Entry']['id'])),
+            $entry['Account']['name_chi'],
+            $this->Number->format($entry['Entry']['amount'] * $factor, $numberOptions),
+            $this->Number->format($tot, $numberOptions),
+            $entry['Entry']['detail'],
+            $entry['Entry']['extra1']);
         echo $this->Html->tableCells($ar,
-                array('class'=>''),array('class'=>'altrow'));
+                array('class'=>''),array('class'=>'altrow'), true);
     }
 ?>
 </table>
