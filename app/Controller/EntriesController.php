@@ -70,7 +70,16 @@ class EntriesController  extends AppController {
 		$options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
 		$this->set('transaction', $this->Entry->find('first', $options));
 	}
-
+        
+	public function create() {
+            if ($this->request->query('type') == 'Cheque') {
+		$accounts = $this->Entry->Account->find('list',
+                    array('conditions'=>array('Account.code LIKE'=>'11%', 'NOT'=>array('Account.code LIKE'=>'%0')),
+                        'fields' => array('Account.id', 'Account.name_chi'))
+                );
+            }
+            $this->set(compact('accounts'));
+        }
 /**
  * add method
  *
