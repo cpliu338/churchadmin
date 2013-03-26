@@ -1,5 +1,7 @@
 <?php
-App::uses('AppController', 'Controller','Number');
+App::uses('AppController', 'Controller');
+App::uses('Number','Helper');
+App::uses('Js','Helper');
 /**
  * Description of EntriesController
  *
