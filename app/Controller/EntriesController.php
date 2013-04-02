@@ -74,14 +74,29 @@ class EntriesController  extends AppController {
 	}
         
 	public function create() {
-            if ($this->request->query('type') == 'Cheque') {
 		$accounts = $this->Entry->Account->find('list',
-                    array('conditions'=>array('Account.code LIKE'=>'11%', 'NOT'=>array('Account.code LIKE'=>'%0')),
-                        'fields' => array('Account.id', 'Account.name_chi'))
-                );
-            }
-            $this->set(compact('accounts'));
-        }
+				array('conditions'=>array('Account.code LIKE'=>'11%', 'NOT'=>array('Account.code LIKE'=>'%0')),
+					'fields' => array('Account.id', 'Account.name_chi'))
+			);
+		$this->set(compact('accounts'));
+		$this->set('cheqno','cheque 2345');
+		if ($this->request->is('post') == 'Cheque') {
+			if ($this->data['Entry']['account_id']=='11201' && preg_match('/^[0-9]{1,6}$/', $this->data['Entry']['detail'])) {
+				$this->Entry->save($this->request->data);
+				$this->Session->setFlash($this->Entry->getLastInsertID());
+				$this->redirect(array('action'=>'index'));
+				return;
+			}
+			else {
+				$this->Entry->validationErrors['detail']='invalid cheque number';
+				return;
+			}
+		}
+		else {
+			$this->request->data('Entry.date1',$this->Entry->getCreateDate()); 
+			//debug($this->Session->read('Transaction.startDate'));
+		}
+	}
 /**
  * add method
  *

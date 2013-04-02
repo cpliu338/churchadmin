@@ -7,6 +7,7 @@
 class Entry extends AppModel {
 
     const startDateKey = 'Entry.startDate';
+    const createDateKey = 'Entry.createDate';
     const filter = 'Entry.filter';
 	
     public function getYearStart($date1) {
@@ -43,6 +44,22 @@ class Entry extends AppModel {
 		$startDate = date('Y-m-d');
 		CakeSession::write(self::startDateKey, $startDate);
 		return $startDate;
+	}
+	
+	public function getCreateDate() {
+		App::uses('CakeSession', 'Model/Datasource');
+		if (CakeSession::check(self::createDateKey))
+			return CakeSession::read(self::createDateKey);
+		$createDate = $this->getStartDate();
+		CakeSession::write(self::createDateKey, $createDate);
+		return $createDate;
+	}
+	
+	public function setCreateDate($date2) {
+		if (preg_match('/^20[0-4][0-9]-[0-9]{1,2}-[0-9]{1,2}$/', $date2)) {
+			App::uses('CakeSession', 'Model/Datasource');
+			CakeSession::write(self::createDateKey, $date2);
+		}
 	}
 	
 	public function getEndDate($d) {
