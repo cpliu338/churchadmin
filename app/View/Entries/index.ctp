@@ -34,12 +34,4 @@ SCRIPT2;
 	echo $this->element('entries1', array('entries'=>$entries));
         $base = $this->request->base;
 ?>
-<div id="dlg1" title="hey">
-    <form method="get" action="<?php echo "$base/entries/create" ?>">
-        <select name="type">
-            <option>Cheque</option>
-            <option>Cash</option>
-        </select>
-        <p><input type="submit" value="Create"/></p>
-    </form>
-</div>
+

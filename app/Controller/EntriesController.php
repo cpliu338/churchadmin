@@ -125,18 +125,21 @@ class EntriesController  extends AppController {
  */
 	public function edit($id = null) {
 		if (!$this->Entry->exists($id)) {
-			throw new NotFoundException(__('Invalid transaction'));
+			throw new NotFoundException(__('Invalid entry'));
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
 			if ($this->Entry->save($this->request->data)) {
-				$this->Session->setFlash(__('The transaction has been saved'));
+				$this->Session->setFlash(__('The entry has been saved'));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The transaction could not be saved. Please, try again.'));
+				$this->Session->setFlash(__('The entry could not be saved. Please, try again.'));
 			}
 		} else {
-			$options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
-			$this->request->data = $this->Entry->find('first', $options);
+                    $options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
+                    $this->request->data = $this->Entry->find('first', $options);
+                    $this->set("entries", $this->Entry->find('all', array(
+                        'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
+                    )));
 		}
 		$accounts = $this->Entry->Account->find('list');
 		$this->set(compact('accounts'));
