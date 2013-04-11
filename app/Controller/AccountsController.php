@@ -226,4 +226,28 @@ class AccountsController extends AppController {
 		$this->Session->setFlash(__('Account was not deleted'));
 		$this->redirect(array('action' => 'index'));
 	}
+	
+	function suggest() {
+		Configure::write('debug', 0);
+		$val =  $this->params['url']['val'];
+		$raw = $this->Account->find('all', array(
+			'conditions'=>array('Account.code LIKE'=>$val.'%',
+				'NOT'=>array('details'=>'deadmark')),
+			'order'=>'code'));
+foreach ($raw as $acc) {
+	if (substr($acc['Account']['code'], -1) == '0')
+		continue;
+	unset($hash);
+	$hash['When']=$val;
+	$hash['Value'] = $acc['Account']['id'];
+	$hash['Text'] = $acc['Account']['name_chi'];
+	$arr[]=$hash;
+}
+//debug($arr);
+$this->set('results', $arr);
+$this->set('_serialize','results');
+//		$this->layout = 'js/js1';
+		//$this->set('results',$r);
+	}
+
 }

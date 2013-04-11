@@ -18,6 +18,19 @@ class EntriesController  extends AppController {
             'Entry.date1' => 'asc','Entry.transref' => 'asc'
         )
     );
+    
+    	public $ac_types=array(
+		'1'=>'資產',
+		'2'=>'負債',
+		//'3'=>'產權',
+		'4'=>'收入',
+		'51'=>'薪津',
+		'52'=>'各項服務',
+		'53'=>'辦公室',
+		'54'=>'專業服務',
+		'55'=>'支持關聯機構',
+		'56'=>'差傳開支');
+
         
     public function beforeFilter() {
         parent::beforeFilter();
@@ -127,10 +140,11 @@ class EntriesController  extends AppController {
 		if (!$this->Entry->exists($id)) {
 			throw new NotFoundException(__('Invalid entry'));
 		}
+		$this->set('options', $this->ac_types);
 		if ($this->request->is('post') || $this->request->is('put')) {
 			if ($this->Entry->save($this->request->data)) {
 				$this->Session->setFlash(__('The entry has been saved'));
-				$this->redirect(array('action' => 'index'));
+				//$this->redirect(array('action' => 'index'));
 			} else {
 				$this->Session->setFlash(__('The entry could not be saved. Please, try again.'));
 			}
@@ -141,7 +155,12 @@ class EntriesController  extends AppController {
                         'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
                     )));
 		}
-		$accounts = $this->Entry->Account->find('list');
+		$accounts = $this->Entry->Account->find('list', 
+				array(
+					'order'=>'Account.id', 
+					'fields'=>array('Account.id','Account.name_chi')
+				)
+			);
 		$this->set(compact('accounts'));
 	}
 
