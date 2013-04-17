@@ -20,32 +20,38 @@ class EntriesController  extends AppController {
     );
     
     	public $ac_types=array(
-
 		'1'=>'資產',
-
 		'2'=>'負債',
-
 		//'3'=>'產權',
-
 		'4'=>'收入',
-
 		'51'=>'薪津',
-
 		'52'=>'各項服務',
-
 		'53'=>'辦公室',
-
 		'54'=>'專業服務',
-
 		'55'=>'支持關聯機構',
-
 		'56'=>'差傳開支');
 
-
-        
     public function beforeFilter() {
         parent::beforeFilter();
         $this->set('numberOptions', $this->numberOptions);
+        $this->Auth->allowedActions=array('setNextCheque');
+    }
+
+	/**
+	* Set next cheque no using json (restful) 
+	* To set it to e.g. 1234, POST application/json with {"cheqno":1234}
+	*/    
+    public function setNextCheque() {
+    	if ($this->request->isPost()) {
+    		$nextChequeNo = $this->data['cheqno'];
+    		Cache::write('cheqno',$nextChequeNo);
+    	}
+    	else {
+    		$nextChequeNo = Cache::read('cheqno');
+    	}
+		$nextCheque = array('cheqno'=>$nextChequeNo);
+		$this->set('nextCheque', $nextCheque);
+		$this->set('_serialize','nextCheque');
     }
     
 /**
@@ -103,7 +109,7 @@ class EntriesController  extends AppController {
 					'fields' => array('Account.id', 'Account.name_chi'))
 			);
 		$this->set(compact('accounts'));
-		$this->set('cheqno','cheque 2345');
+		$this->set('cheqno',Cache::read('cheqno'));
 		if ($this->request->is('post') == 'Cheque') {
 			if ($this->data['Entry']['account_id']=='11201' && preg_match('/^[0-9]{1,6}$/', $this->data['Entry']['detail'])) {
 				$this->Entry->save($this->request->data);
