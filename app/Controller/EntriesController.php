@@ -19,17 +19,28 @@ class EntriesController  extends AppController {
         )
     );
     
-    	public $ac_types=array(
-		'1'=>'資產',
-		'2'=>'負債',
-		//'3'=>'產權',
-		'4'=>'收入',
-		'51'=>'薪津',
-		'52'=>'各項服務',
-		'53'=>'辦公室',
-		'54'=>'專業服務',
-		'55'=>'支持關聯機構',
-		'56'=>'差傳開支');
+    	public $ac_types=array(
+
+		'1'=>'資產',
+
+		'2'=>'負債',
+
+		//'3'=>'產權',
+
+		'4'=>'收入',
+
+		'51'=>'薪津',
+
+		'52'=>'各項服務',
+
+		'53'=>'辦公室',
+
+		'54'=>'專業服務',
+
+		'55'=>'支持關聯機構',
+
+		'56'=>'差傳開支');
+
 
         
     public function beforeFilter() {
@@ -136,33 +147,39 @@ class EntriesController  extends AppController {
  * @param string $id
  * @return void
  */
-	public function edit($id = null) {
-		if (!$this->Entry->exists($id)) {
-			throw new NotFoundException(__('Invalid entry'));
-		}
-		$this->set('options', $this->ac_types);
-		if ($this->request->is('post') || $this->request->is('put')) {
-			if ($this->Entry->save($this->request->data)) {
-				$this->Session->setFlash(__('The entry has been saved'));
-				//$this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The entry could not be saved. Please, try again.'));
-			}
-		} else {
-                    $options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
-                    $this->request->data = $this->Entry->find('first', $options);
-                    $this->set("entries", $this->Entry->find('all', array(
-                        'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
-                    )));
-		}
-		$accounts = $this->Entry->Account->find('list', 
-				array(
-					'order'=>'Account.id', 
-					'fields'=>array('Account.id','Account.name_chi')
-				)
-			);
-		$this->set(compact('accounts'));
-	}
+    public function edit($id = null) {
+        if (!$this->Entry->exists($id)) {
+                throw new NotFoundException(__('Invalid entry'));
+        }
+        $this->set('options', $this->ac_types);
+        if ($this->request->is('post') || $this->request->is('put')) {
+            $entry = $this->Entry->find('first', array('conditions' => array('Entry.id' => $id)));
+            $entry['Entry']['detail']=$this->data['Entry']['detail'];
+            $entry['Entry']['account_id']=$this->data['Entry']['account_id'];
+            $entry['Entry']['amount']=$this->data['Entry']['amount'];
+            $entry['Entry']['extra1']=$this->data['Entry']['extra1'];
+                    if ($this->Entry->save($entry)) {
+                            $this->Session->setFlash(__('The entry has been saved'));
+                            //$this->redirect(array('action' => 'index'));
+                    } else {
+                            $this->Session->setFlash(__('The entry could not be saved. Please, try again.'));
+                    }
+        } 
+//                else {
+                $options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
+                $this->request->data = $this->Entry->find('first', $options);
+                $this->set("entries", $this->Entry->find('all', array(
+                    'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
+                )));
+//		}
+            $accounts = $this->Entry->Account->find('list', 
+                            array(
+                                    'order'=>'Account.id', 
+                                    'fields'=>array('Account.id','Account.name_chi')
+                            )
+                    );
+            $this->set(compact('accounts'));
+    }
 
 /**
  * delete method
