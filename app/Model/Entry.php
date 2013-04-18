@@ -67,6 +67,12 @@ class Entry extends AppModel {
 		return substr($d,0,4).'-12-31';
 	}
 
+    public function nextTransref() {
+        $entry = $this->find('first',array(
+            'order'=>'transref DESC'
+        ));
+        return $entry['Entry']['transref']+1;
+    }
 /**
  * Display field
  *
@@ -80,16 +86,16 @@ class Entry extends AppModel {
  * @var array
  */
 	public $validate = array(
-		'transref' => array(
-			'numeric' => array(
-				'rule' => array('numeric'),
-				//'message' => 'Your custom message here',
-				//'allowEmpty' => false,
-				//'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
-			),
-		),
+            'amount' => array(
+                'numberOnly' => array(
+                    'rule' => array('numeric'),
+                ),
+            ),
+            'transref' => array(
+                'numeric' => array(
+                    'rule' => array('numeric'),
+                ),
+            ),
 		'date1' => array(
 			'date' => array(
 				'rule' => array('date'),

@@ -95,38 +95,64 @@ class EntriesController  extends AppController {
  * @param string $id
  * @return void
  */
-	public function view($id = null) {
-		if (!$this->Entry->exists($id)) {
-			throw new NotFoundException(__('Invalid transaction'));
-		}
-		$options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
-		$this->set('transaction', $this->Entry->find('first', $options));
-	}
-        
-	public function create() {
-		$accounts = $this->Entry->Account->find('list',
-				array('conditions'=>array('Account.code LIKE'=>'11%', 'NOT'=>array('Account.code LIKE'=>'%0')),
-					'fields' => array('Account.id', 'Account.name_chi'))
-			);
-		$this->set(compact('accounts'));
-		$this->set('cheqno',Cache::read('cheqno'));
-		if ($this->request->is('post') == 'Cheque') {
-			if ($this->data['Entry']['account_id']=='11201' && preg_match('/^[0-9]{1,6}$/', $this->data['Entry']['detail'])) {
-				$this->Entry->save($this->request->data);
-				$this->Session->setFlash($this->Entry->getLastInsertID());
-				$this->redirect(array('action'=>'index'));
-				return;
-			}
-			else {
-				$this->Entry->validationErrors['detail']='invalid cheque number';
-				return;
-			}
-		}
-		else {
-			$this->request->data('Entry.date1',$this->Entry->getCreateDate()); 
-			//debug($this->Session->read('Transaction.startDate'));
-		}
-	}
+    public function view($id = null) {
+            if (!$this->Entry->exists($id)) {
+                    throw new NotFoundException(__('Invalid transaction'));
+            }
+            $options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
+            $this->set('transaction', $this->Entry->find('first', $options));
+    }
+
+    public function create() {
+        $accounts = $this->Entry->Account->find('list',
+            array('conditions'=>array('Account.code LIKE'=>'11%', 'NOT'=>array('Account.code LIKE'=>'%0')),
+                'fields' => array('Account.id', 'Account.name_chi'))
+        );
+        $this->set(compact('accounts'));
+        $cheqno = Cache::read('cheqno');
+        $this->set('cheqno',$cheqno);
+        $this->set('extra1',__('ExtraInfo'));
+        $this->set('cheque',__('ChequeNumber'));
+        if ($this->request->is('post')) {
+            $checking = $this->Entry->Account->isChecking($this->data['Entry']['account_id']);
+            $this->set('isChecking',$checking);
+            if ($checking) {
+                // pre-processing for checking accounts
+                if (!preg_match('/^[0-9]{1,6}$/', $this->data['Entry']['extra1'])) {
+                    $this->Entry->validationErrors['extra1']='invalid cheque number';
+                    return;
+                }
+                if (!preg_match('/^[0-9]+(\.[0-9][0-9]?)?$/', $this->data['Entry']['amount'])) {
+                    $this->Entry->validationErrors['amount']='invalid amount ###.##';
+                    return;
+                }
+                Cache::write('cheqno',$this->data['Entry']['extra1']+1);
+                $this->request->data('Entry.extra1','$'.$this->data['Entry']['extra1']);
+//                if ($this->Entry->save($this->request->data)) {
+//                    $this->Session->setFlash($this->Entry->getLastInsertID());
+//                    $this->redirect(array('action'=>'index'));
+//                    return;
+//                }
+            }
+            else {
+                // extra1 not used
+                $this->request->data('Entry.extra1','');
+            }
+            $this->request->data('Entry.transref',$this->Entry->nextTransref());
+            $this->Entry->setCreateDate($this->data['Entry']['date1']);
+            if ($this->Entry->save($this->request->data)) {
+                $this->Session->setFlash(__('Saved'));
+                $this->redirect(array('action'=>'edit', $this->Entry->getLastInsertID()));
+            }
+        }
+        else { //HTTP GET
+            $this->set('isChecking',TRUE);
+            $this->request->data('Entry.date1',$this->Entry->getCreateDate()); 
+            $this->request->data('Entry.account_id',11201);
+            $this->request->data('Entry.extra1',$cheqno);
+//            debug($this->Entry->nextTransref());
+        }
+    }
 /**
  * add method
  *
