@@ -89,18 +89,25 @@ class EntriesController  extends AppController {
 	}
 
 /**
- * view method
+ * vet method
  *
  * @throws NotFoundException
  * @param string $id
  * @return void
  */
-    public function view($id = null) {
-            if (!$this->Entry->exists($id)) {
-                    throw new NotFoundException(__('Invalid transaction'));
+    public function vet($id = null) {
+            if (!$this->Entry->Account->exists($id)) {
+                    throw new NotFoundException(__('Invalid account'));
             }
-            $options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
-            $this->set('transaction', $this->Entry->find('first', $options));
+            $this->set('entries', $this->Entry->find('all',
+            	array('conditions' => array('Entry.account_id' => $id,
+            		'Entry.extra1 LIKE'=>'$%'))
+			));
+			if ($this->request->is('post')) {
+				//debug($this->request);
+				print_r($this->data['EntryId']);
+			}
+            //$this->set('transaction', $this->Entry->find('first', $options));
     }
 
     public function create() {
@@ -158,18 +165,42 @@ class EntriesController  extends AppController {
  *
  * @return void
  */
-	public function add() {
+	public function add($transref) {
+		$entries = $this->Entry->find('all',array('conditions'=>array(
+			'Entry.transref'=>$transref)
+			));
+        if (empty($entries)) {
+                throw new NotFoundException(__('Invalid transaction reference'));
+        }
+        $this->set('options', $this->ac_types);
+		$this->set('entries', $entries);
+		$accounts = $this->Entry->Account->find('list', 
+			array(
+				'order'=>'Account.id', 
+				'fields'=>array('Account.id','Account.name_chi')
+			)
+		);
+		$this->set(compact('accounts'));
 		if ($this->request->is('post')) {
-			$this->Entry->create();
+			// $this->Entry->create();
+			$entry = $entries[0];
+			$this->request->data('Entry.id',null);
+			$this->request->data('Entry.extra1','');
+			$this->request->data('Entry.date1',$entry['Entry']['date1']);
+			$this->request->data('Entry.transref',$entry['Entry']['transref']);
 			if ($this->Entry->save($this->request->data)) {
 				$this->Session->setFlash(__('The transaction has been saved'));
 				$this->redirect(array('action' => 'index'));
 			} else {
 				$this->Session->setFlash(__('The transaction could not be saved. Please, try again.'));
+				$this->render('edit');
 			}
 		}
-		$accounts = $this->Entry->Account->find('list');
-		$this->set(compact('accounts'));
+		else {
+			$this->request->data('Entry.id',null);
+			$this->request->data('Entry.amount',0.0);
+			$this->render('edit');
+		}
 	}
 
 /**
@@ -203,13 +234,12 @@ class EntriesController  extends AppController {
                 $this->set("entries", $this->Entry->find('all', array(
                     'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
                 )));
-//		}
             $accounts = $this->Entry->Account->find('list', 
-                            array(
-                                    'order'=>'Account.id', 
-                                    'fields'=>array('Account.id','Account.name_chi')
-                            )
-                    );
+				array(
+					'order'=>'Account.id', 
+					'fields'=>array('Account.id','Account.name_chi')
+				)
+			);
             $this->set(compact('accounts'));
     }
 

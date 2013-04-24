@@ -53,8 +53,11 @@ SCRIPT1;
 <?php endforeach; ?>
 </table>
 <?php
+	if ($this->data['Entry']['id']) { // not null, i.e. edit, render "add" link
+		echo $this->Html->link(__('Add'),array('action'=>'add', $entry['Entry']['transref']));
+	}
 	echo $this->Form->create('Entry');
-        //echo $this->Form->hidden('id'),
+        echo __('Date'), ': ', $entry['Entry']['date1'];//$this->Form->hidden('id'),
         //$this->Form->input('date1', array('type'=>'text','readonly'=>TRUE));
 ?>
 <div>
@@ -77,6 +80,6 @@ SCRIPT1;
 <?php
     echo $this->Form->input('detail'),
         $this->Form->hidden('extra1'),
-        $this->Form->end('Submit');
+        $this->Form->end(__('Update'));
         $base = $this->request->base;
 ?>
