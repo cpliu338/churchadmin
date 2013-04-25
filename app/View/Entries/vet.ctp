@@ -17,21 +17,20 @@ $(function() {
 	$("#cheques").bind("picklist_onchange", changeHandler)
 });
 	function changeHandler(event, obj) {
-		var itemIds = [];
 		var accum=new Number(0.0);
-		obj.items.each(function()
+		$('#cheques :selected').each(function(i,selected)
 		{
-			var v = $(this).text();//attr("data-value");
+			var v = $(selected).text();
 			var index=v.lastIndexOf(":");
 			accum=accum+new Number(v.substring(index+1));//new Number(v.substring(index));
 		});
-		$("#checksum").html(accum);
+		$("#checksum").html(accum.toFixed(2));
 	}
 SCRIPT1;
     echo $this->Html->scriptBlock($script1, array('inline'=>false));
 	echo $this->Form->create('Entry');
 ?>
-<div id='checksum'>0</div>
+<div >Checksum: <span id='checksum'>0.00</span></div>
 <select id="cheques" name='EntryId[]' multiple="multiple" style="clear:none" size='5'>
 <?php
 	foreach ($entries as $entry) {

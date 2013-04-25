@@ -96,17 +96,34 @@ class EntriesController  extends AppController {
  * @return void
  */
     public function vet($id = null) {
-            if (!$this->Entry->Account->exists($id)) {
-                    throw new NotFoundException(__('Invalid account'));
+        if (!$this->Entry->Account->exists($id)) {
+                throw new NotFoundException(__('Invalid account'));
+        }
+        $this->set('entries', $this->Entry->find('all',
+            array('conditions' => array('Entry.account_id' => $id,
+                    'Entry.extra1 LIKE'=>'$%'),
+                'order'=>'Entry.extra1')
+                    ));
+        if ($this->request->is('post')) {
+//            foreach ($this->data['EntryId'] as $id)
+//                debug($id);
+            if (!empty($this->data['EntryId']))
+                $cnt = count($this->data['EntryId']);
+            else
+                $cnt = 0;
+            switch ($cnt) {
+                case 0: $cond = null; break;
+                case 1: $cond = array('Entry.id' => $this->data['EntryId'][0]); break;
+                default : $cond = array('Entry.id IN' => $this->data['EntryId']); break;
             }
-            $this->set('entries', $this->Entry->find('all',
-            	array('conditions' => array('Entry.account_id' => $id,
-            		'Entry.extra1 LIKE'=>'$%'))
-			));
-			if ($this->request->is('post')) {
-				//debug($this->request);
-				print_r($this->data['EntryId']);
-			}
+            if (!empty($cond))
+                $this->Entry->updateAll(
+                    array('Entry.extra1' => "CONCAT('#',MID(extra1,2,10))"),
+                    $cond
+            );
+            $this->Session->setFlash(__("Updated %d entries", $cnt));
+            $this->redirect(array('action'=>'vet',$id));
+        }
             //$this->set('transaction', $this->Entry->find('first', $options));
     }
 
