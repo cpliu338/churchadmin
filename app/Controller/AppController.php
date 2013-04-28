@@ -32,9 +32,17 @@ App::uses('Controller', 'Controller');
  * @link http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
-	var $components = array('Auth',
+	var $components = array('Auth', 'RequestHandler',
 		'Session');
-	
+        
+    var $numberOptions = array(
+        'places' => 2,
+        'escape' => false,
+        'before' => '',
+        'decimals' => '.',
+        'thousands' => ','
+    );
+    
 	public function isLevelEnough($lev) {
 		$user = $this->Auth->user();
 		return $user['level']>=$lev;

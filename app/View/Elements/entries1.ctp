@@ -1,22 +1,27 @@
 <table>
 <?php
+    $this->append('css');
+    echo "<style>.column-4 { text-align:right}</style>";
+    echo "<style>.column-5 { text-align:right}</style>";
+    $this->end();
+
 	echo
 		$this->Html->tableHeaders(array(__('Date'),__('Ref'),
-		__('Account'),'DB','CR', __('Detail')));
-	foreach ($transactions as $transaction) {
+		__('Account'),'DB','CR', __('Detail'), __('Extra')));
+	foreach ($entries as $entry) {
 		$ar = array(
-			$transaction['Transaction']['date1'],
-			$this->Html->link($transaction['Transaction']['tran_id'],
-				array('action'=>'edit',$transaction['Transaction']['id'])),
-			$transaction['Account']['name_chi']);
-		$amt = $transaction['Transaction']['amount'];
+			$entry['Entry']['date1'],
+			$this->Html->link($entry['Entry']['transref'],
+				array('action'=>'edit',$entry['Entry']['id'])),
+			$entry['Account']['name_chi']);
+		$amt = $entry['Entry']['amount'];
 		if ($amt<0) 
-			array_push($ar,0-$amt,'');
+			array_push($ar, $this->Number->format(0-$amt, $numberOptions),'');
 		else
-			array_push($ar,'',$amt);
-		array_push($ar,$transaction['Transaction']['detail']);
+			array_push($ar,'',$this->Number->format($amt, $numberOptions));
+		array_push($ar,$entry['Entry']['detail'],$entry['Entry']['extra1']);
 		echo $this->Html->tableCells($ar,
-			array('class'=>''),array('class'=>'altrow'));
+			array('class'=>''),array('class'=>'altrow'),true /* useCount */);
 	}
 ?>
 </table>

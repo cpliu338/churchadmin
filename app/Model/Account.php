@@ -11,15 +11,22 @@ class Account extends AppModel {
  *
  * @var string
  */
-	public $displayField = 'name';
-	
-	public function getPatternUnder($code) {
-		$c = $code;
-		if (substr($c,-1)=='0') {
-			$c[strlen($c)-1]='%';
-		}
-		return $c;
-	}
+    public $displayField = 'name';
+
+    public function getPatternUnder($code) {
+            $c = $code;
+            if (substr($c,-1)=='0') {
+                    $c[strlen($c)-1]='%';
+            }
+            return $c;
+    }
+    /**
+     * Check whether the account is a checking account.  Entry's extra1 attribute will be the cheque no.
+     * @param type $id
+     */
+    public function isChecking($id) {
+        return ($id==11201);
+    }
 
 /**
  * Validation rules

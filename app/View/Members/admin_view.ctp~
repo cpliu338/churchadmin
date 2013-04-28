@@ -1,6 +1,0 @@
-<h2><?php echo __('Debug');?></h2>
-<?php
-	echo $value;	
-	//echo $member['Member']['nickname'];
-?>
-

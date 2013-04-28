@@ -8,9 +8,16 @@ App::uses('AppModel', 'Model');
  */
 class Transaction extends AppModel {
 
-	const startDateKey = 'Transaction.startDate';
-	const filter = 'Transaction.filter';
+    const startDateKey = 'Transaction.startDate';
+    const filter = 'Transaction.filter';
 	
+    public function getYearStart($date1) {
+        if (preg_match('/^20[1-9][1-9]/', $date1, $matches)) {
+            return $matches[0].'-01-01';
+        }
+        return '2010-01-01';
+    }
+    
 	public function setDetail($filter1) {
 		App::uses('CakeSession', 'Model/Datasource');
 		CakeSession::write(self::filter, $filter1);
