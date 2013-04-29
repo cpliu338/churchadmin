@@ -54,6 +54,38 @@ class EntriesController  extends AppController {
 		$this->set('_serialize','nextCheque');
     }
     
+    function totalize($code) {
+//        if ($this->request->is('ajax'))
+            Configure::write('debug', 0);
+        $code2 = $code;
+        if (substr($code, -1)=='0') {
+            $code2[strlen($code)-1]='%';
+        }
+        $subcodes = array();
+        foreach ($this->Entry->Account->find('list', array(
+            'conditions'=>array('Account.code LIKE'=>$code2)
+            )) as $id=>$name) {
+                array_push($subcodes, $id);
+        }
+        $conditions = array(
+            'Entry.date1 >='=>$this->Entry->getYearStart($this->Entry->getStartDate()),
+            'Entry.date1 <='=>$this->Entry->getYearEnd($this->Entry->getStartDate())
+        );
+        switch (count($subcodes)) {
+            case 0: $conditions['Entry.account_id']=FALSE; break;
+            case 1: $conditions['Entry.account_id']=$subcodes[0]; break;
+            default: $conditions['Entry.account_id IN']=$subcodes;
+        }
+        $result = $this->Entry->find("first",array(
+            'fields'=>'SUM(Entry.amount) AS sum',
+            'conditions'=>$conditions
+        ));
+        debug($conditions);
+        $total = (empty($result[0]['sum'])) ? "No record" : $result[0]['sum'];
+        $this->set('total', $total);
+        $this->set('_serialize','total');
+    }
+    
 /**
  * index method
  *
