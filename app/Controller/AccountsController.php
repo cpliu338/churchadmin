@@ -18,6 +18,9 @@ class AccountsController extends AppController {
  * @return void
  */
 	public function index() {
+            $this->loadModel('Entry');
+            $this->set('yearStart', $this->Entry->getYearStart($this->Entry->getStartDate()));
+            $this->set('yearEnd', $this->Entry->getYearEnd($this->Entry->getStartDate()));
             if (array_key_exists('under', $this->request->query) && !empty($this->request->query['under'])) {
                 $under = $this->request->query['under'];
                 if (substr($under, -1)==='0')

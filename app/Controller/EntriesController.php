@@ -8,7 +8,7 @@ App::uses('Js','Helper');
  * @author Administrator
  */
 class EntriesController  extends AppController {
-	public $helpers = array('Js' => array('Jquery'));
+	public $helpers = array('Number','Js' => array('Jquery'));
 	
 	public $paginate = array(
 			'fields' => array('Entry.id', 'Entry.transref','Entry.amount','Entry.detail',
@@ -55,7 +55,8 @@ class EntriesController  extends AppController {
     }
     
     function totalize($code) {
-//        if ($this->request->is('ajax'))
+        $this->layout='ajax';
+        if ($this->request->is('ajax'))
             Configure::write('debug', 0);
         $code2 = $code;
         if (substr($code, -1)=='0') {
@@ -82,8 +83,9 @@ class EntriesController  extends AppController {
         ));
         debug($conditions);
         $total = (empty($result[0]['sum'])) ? "No record" : $result[0]['sum'];
-        $this->set('total', $total);
-        $this->set('_serialize','total');
+        $this->set('amt', $total);
+//        $this->set('_serialize','total');
+        $this->render('/Elements/ajax_amount');
     }
     
 /**
