@@ -81,7 +81,7 @@ class EntriesController  extends AppController {
             'fields'=>'SUM(Entry.amount) AS sum',
             'conditions'=>$conditions
         ));
-        debug($conditions);
+        //debug($conditions);
         $total = (empty($result[0]['sum'])) ? "No record" : $result[0]['sum'];
         $this->set('amt', $total);
 //        $this->set('_serialize','total');

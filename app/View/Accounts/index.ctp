@@ -1,4 +1,5 @@
 <?php 
+	//debug($this->Totalize->makeAjaxCall($this->request->base,10));
     $this->append('css');
     echo "<style>.column-3 { text-align:right}</style>";
     echo "<style>.column-3 span {margin-right: 50px}</style>";
@@ -16,9 +17,10 @@ $script2 =<<<SCRIPT2
 SCRIPT2;
     $snippet ='';
     foreach ($accounts as $account) {
-        $snippet = $snippet. __($format, $account['Account']['code'], $account['Account']['code'])."\n";
+        //$snippet = $snippet. __($format, $account['Account']['code'], $account['Account']['code'])."\n";
+        $snippet = $snippet. $this->Totalize->makeAjaxCall($this->request->base,$account['Account']['code']) . "\n";
     }
-    echo $this->Html->scriptBlock("$script1\n$snippet\n$script2", array('inline'=>false));
+    echo $this->Html->scriptBlock("$script1\n$snippet $script2", array('inline'=>false));
 ?>
 <table>
 <?php

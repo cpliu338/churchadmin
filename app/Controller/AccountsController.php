@@ -6,6 +6,8 @@ App::uses('AppController', 'Controller','Number');
  * @property Account $Account
  */
 class AccountsController extends AppController {
+	
+	public $helpers = array('Form', 'Html', 'Js', 'Totalize');
     
     public function beforeFilter() {
         parent::beforeFilter();
