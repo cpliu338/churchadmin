@@ -1,18 +1,12 @@
 <?php echo $this->element('menu', array('toggle'=>$toggle));?>
+<div>
+<?php echo $this->Html->link(__('Add'), array('action'=>'add'));?>
+</div>
 <table style="width:400px">
 <?php
     $this->append('css');
     echo "<style>.column-2 { text-align:right}</style>";
     $this->end();
-
-//    $numberOptions = array(
-//        'places' => 2,
-//        'escape' => false,
-//        'before' => '',
-//        'decimals' => '.',
-//        'thousands' => ','
-//    );
-
     echo $this->Html->tableHeaders(array(__('Date'),array(__('Total') => array('class' => 'column-2'))));
     foreach ($offers as $offer) {
         echo $this->Html->tableCells(

@@ -7,17 +7,43 @@ App::uses('AppController', 'Controller','Number');
  */
 class OffersController extends AppController {
     
-//    var $numberOptions = array(
-//        'places' => 2,
-//        'escape' => false,
-//        'before' => '',
-//        'decimals' => '.',
-//        'thousands' => ','
-//    );
-
     public function beforeFilter() {
         parent::beforeFilter();
         $this->set('numberOptions',$this->numberOptions);
+    }
+    
+    public function add() {
+		$this->loadModel('Member');
+		$raw = $this->Offer->Member->find('all',array('group'=>'name1','order'=>'name1',
+			//'fields'=>array('name1'),
+			'recursive'=>0,
+			'conditions'=>array('Member.id <'=>10000),
+			'fields'=>array('LEFT(Member.name,1) AS name1')
+		));
+		foreach ($raw as $entry) {
+			$e = $entry[0]['name1'];
+			$arr[$e]=$e;
+		}
+		$this->set('name1', $arr);
+		$this->set('lastSunday', $this->Offer->getLastSunday());
+/**/
+		$this->set('members', $this->Offer->Member->find('list', array('order'=>'Member.name','conditions'=>array('Member.id <'=>10000))));
+/**/
+		$this->set('accounts', $this->Offer->Account->find('list', array('order'=>'Account.id', 'fields'=>array('Account.id','Account.name_chi'),
+			'conditions'=>array('Account.code REGEXP'=>'^41[1-9]+$'))));
+		if (empty($this->data)) {
+//			if (!$d || !preg_match('/^20\d\d\-\d\d-\d\d$/', $d))
+				$this->request->data('Offer.date1', $this->Offer->getLastSunday());
+			// else
+				// $this->data['Offer']['date1'] = $d;
+			$this->request->data('Offer.amount', 0);
+		}
+		else {
+			if ($this->Offer->save($this->data)) {
+				$this->request->data('Offer.amount', 0);
+				$this->Session->setFlash('The offer has been saved.');
+			}
+		}
     }
     
     public function index() {

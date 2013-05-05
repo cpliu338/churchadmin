@@ -27,6 +27,25 @@ class Offer extends AppModel {
                 'order' => ''
         )
     );
+    var $validate = array(
+        'amount' => array(
+            'Currency' => array(
+	    	'rule' => array('custom', '/^[0-9]+(\.\d{1,2})?$/'),
+                'required' => true,
+                'message' => 'Valid money format only'
+                ),
+            'Positive' => array(
+                'rule' => array('comparison', '>=', 0),
+                'message' => 'Non negative numbers only'
+            )
+        ),
+    );
+	
+	function getLastSunday() {
+		$today = getdate();
+		$wkday = $today['wday']; // 0=Sunday
+		return date('Y-m-d',  time()- $today['wday']*86400);
+	}
 
 }
 ?>

@@ -267,4 +267,23 @@ HELP;
 		$this->Session->setFlash(__('Member was not deleted'));
 		$this->redirect(array('action' => 'index'));
 	}
+	
+	function suggest() {
+		Configure::write('debug', 0);
+		$val =  $this->params['url']['val'];
+		$raw = $this->Member->find('list',array(
+			'conditions'=>array('Member.name LIKE'=>$val.'%'),
+			'order'=>'Member.name'
+		));
+		//debug($raw);
+		foreach ($raw as $id=>$name) {
+			unset($hash);
+			$hash['When']=$val;
+			$hash['Value'] = $id;
+			$hash['Text'] = $name;
+			$arr[]=$hash;
+		}
+		$this->set('results', $arr);
+		$this->set('_serialize','results');
+	}
 }
