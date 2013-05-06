@@ -12,6 +12,20 @@ class OffersController extends AppController {
         $this->set('numberOptions',$this->numberOptions);
     }
     
+    public function create() {
+        if ($this->request->is('post') && $this->request->is('ajax')) {
+            $ret = json_encode($this->data);
+        }
+        else if ($this->request->is('post')) {
+            $ret = "POST";
+        }
+        else {
+            $ret = "None";
+        }
+        $this->set('text',$ret);
+        $this->render('create', 'ajax');
+    }
+    
     public function add() {
 		$this->loadModel('Member');
 		$raw = $this->Offer->Member->find('all',array('group'=>'name1','order'=>'name1',

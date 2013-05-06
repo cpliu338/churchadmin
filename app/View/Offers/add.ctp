@@ -34,7 +34,25 @@ $(document).ready(function() {
     });
 
 SCRIPT1;
-	echo $this->Form->create('Offer');
+    $data = $this->Js->get('#OfferCreateForm')->serializeForm(array('isForm' => true, 'inline' => true));
+    $before = $this->Js->get('#ajax_result')->effect('fadeIn');
+    $complete = $this->Js->get('#ajax_result')->effect('fadeOut');
+    $this->Js->get('#OfferCreateForm')->event(
+          'submit',
+          $this->Js->request(
+            array('action' => 'create'),
+            array(
+                    'update' => '#ajax_result',
+                'before'=>$before,
+                'complete'=>$complete,
+                    'data' => $data,
+                    'async' => true,    
+                    'dataExpression'=>true,
+                    'method' => 'POST'
+                )
+            )
+        );
+    echo $this->Form->create('Offer', array('action' => 'create', 'default' => false));
 ?>
     <select id='OfferName1'>
 <?php foreach ($name1 as $key=>$value): ?>
@@ -48,5 +66,6 @@ SCRIPT1;
         $this->Form->input('amount'),
         $this->Form->input('date1',array('type'=>'text')),
         $this->Form->end(__('Submit'));
-        //$base = $this->request->base;
+        echo $this->Js->writeBuffer();
 ?>
+<div id="ajax_result">Result</div>
