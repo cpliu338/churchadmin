@@ -35,16 +35,17 @@ $(document).ready(function() {
 
 SCRIPT1;
     $data = $this->Js->get('#OfferCreateForm')->serializeForm(array('isForm' => true, 'inline' => true));
-    $before = $this->Js->get('#ajax_result')->effect('fadeIn');
-    $complete = $this->Js->get('#ajax_result')->effect('fadeOut');
+    $before = "\$('#ajax_result').html('Loading')";
+    $error = "\$('#ajax_result').html('Error')";
+    $success = "\$('#OfferAmount').val(0);\$('#ajax_result').html(data);";
     $this->Js->get('#OfferCreateForm')->event(
           'submit',
           $this->Js->request(
             array('action' => 'create'),
             array(
-                    'update' => '#ajax_result',
+                    'success' => $success,
                 'before'=>$before,
-                'complete'=>$complete,
+                'error'=>$error,
                     'data' => $data,
                     'async' => true,    
                     'dataExpression'=>true,
