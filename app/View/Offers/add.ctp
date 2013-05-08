@@ -69,4 +69,4 @@ SCRIPT1;
         $this->Form->end(__('Submit'));
         echo $this->Js->writeBuffer();
 ?>
-<div id="ajax_result">Result</div>
+<div class="message" id="ajax_result"></div>

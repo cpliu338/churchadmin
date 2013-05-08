@@ -15,8 +15,9 @@ class OffersController extends AppController {
     public function create() {
         if ($this->request->is('post') && $this->request->is('ajax')) {
         	$this->Offer->set($this->request->data);
-        	if ($this->Offer->validates())
-				$ret = json_encode($this->data);
+        	//if ($this->Offer->validates())
+        	if ($this->Offer->save($this->data))
+				$ret = "Saved";//json_encode($this->data);
 			else
 				$ret = "Error";
         }
