@@ -1,5 +1,8 @@
 <?php 
 	echo $this->element('menu', array('toggle'=>$toggle)); 
+	echo $this->Form->create('Member'), 
+		$this->Form->input('name', array('label'=>__('Name contains'))),
+		$this->Form->end('Submit');
 ?>	
 <table>
 <?php

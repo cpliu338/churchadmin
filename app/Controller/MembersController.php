@@ -55,7 +55,13 @@ class MembersController extends AppController {
  */
 	public function index() {
 		$this->Member->recursive = 0;
-		$this->set('members', $this->paginate());
+		$filter = '%';
+		if ($this->request->is('post')) {
+			$filter = '%'.trim($this->data['Member']['name']).'%';
+		}
+		$this->set('members', $this->paginate('Member',
+			array('name LIKE'=>$filter)
+			));
 	}
 
 /**
