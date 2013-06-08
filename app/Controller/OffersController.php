@@ -87,6 +87,7 @@ class OffersController extends AppController {
                 'order'=>'Account.code'
             ))
         );
+        $this->set('isAdmin', $this->isLevelEnough(90));
     }    
     /**
      * List all offers

@@ -94,6 +94,21 @@ class MembersController extends AppController {
 				$this->Session->setFlash(__('The member could not be saved. Please, try again.'));
 			}
 		}
+		else {
+			$raw = $this->Member->find('all',array(
+				'fields'=>'DISTINCT (Member.groupname) AS groupname2',
+				'order'=>'groupname2'	
+				));
+			$groups = array();
+			foreach ($raw as $entry) {
+				$name = $entry['Member']['groupname2'];
+				$groups[$name] = $name;
+			}
+			$this->set('groups',
+				//$this->Member->find('list',array('limit'=>5)				
+					$groups
+			);
+		}
 	}
 
 /**

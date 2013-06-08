@@ -13,6 +13,18 @@ class Account extends AppModel {
  */
     public $displayField = 'name';
 
+    public function getBreadCrumb($code) {
+    	$ar = array();
+    	if (strlen($code)<2) return $ar;
+    	$endInZero = ($code[strlen($code)-1]==0);
+    	for ($i=1; $i<strlen($code) - ($endInZero?1:0);$i++) {
+    		array_push($ar,sprintf("%s0",substr($code,0,$i)));
+    	}
+    	return $ar;
+    	// if (preg_match('/0$/',$code) {
+    	// }
+    }
+    
     public function getPatternUnder($code) {
             $c = $code;
             if (substr($c,-1)=='0') {
