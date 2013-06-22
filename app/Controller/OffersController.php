@@ -6,6 +6,8 @@ App::uses('AppController', 'Controller','Number');
  * @author Administrator
  */
 class OffersController extends AppController {
+
+	var $uses = array('Offer', 'Entry', 'Account', 'Member');
     
     public function beforeFilter() {
         parent::beforeFilter();
@@ -74,6 +76,76 @@ class OffersController extends AppController {
                 'limit'=>10
             ))
         );
+    }
+    
+    /**
+    */
+    public function post($date1=NULL) {
+        if (!$this->isLevelEnough(90)) {
+            throw new ForbiddenException(__('Forbidden'));
+        }
+        if (!preg_match('/^20[0-9]{2}-[0-1]?[0-9]-[0-3]?[0-9]$/',$date1)) {
+            throw new NotFoundException(__('Invalid')+" $date1");
+        }
+        $this->set('date1', $date1);
+        if ($this->request->is('get')) {
+			$this->set('offers',
+				$this->Offer->find('all', array(
+					'conditions'=>array('Offer.date1'=>$date1, 'Offer.posted'=>false),
+					'order'=>'Account.code'
+				))
+			);
+			$this->set('accounts', $this->Offer->Account->find('list', 
+				array(
+					'order'=>'Account.id', 
+					'fields'=>array('Account.id','Account.name_chi'),
+					'conditions'=>array('Account.code REGEXP'=>'^11.*[^0]$')
+					// array('Account.id <'=>20000)
+				)
+			));
+		}
+		else {
+			$offers = $this->Offer->find('all',
+					array('conditions'=>array('Offer.date1'=>$date1, 'posted'=>false),
+						'fields'=>array('SUM(amount) AS tot', 'account_id'),
+						'group'=>'account_id',
+						)
+				);
+			$this->Offer->updateAll(
+				array('Offer.posted'=>true),
+				array('Offer.date1'=>$date1, 'posted'=>false)
+			);
+			$nextTransId = $this->Entry->nextTransref();
+			$ar = array();
+			//$reportdate = $this->data['Offer']['date'];
+			$tot = 0;
+			foreach ($offers as $offer) {
+				$ar[] = array(
+					'transref'=>$nextTransId,
+					'account_id'=>$offer['Offer']['account_id'],
+					'date1'=>$date1,
+					'amount'=>$offer[0]['tot'],
+					'detail'=>"Offer on $date1"
+					);
+				$tot -= $offer[0]['tot'];
+			}
+			$ar[] = array(
+					'transref'=>$nextTransId,
+					'account_id'=>$offer['Offer']['account_id'],
+					'date1'=>$date1,
+					'amount'=>$tot,
+					'detail'=>"Offer on $date1"
+					);
+			if ($this->Entry->saveAll($ar))
+			{
+				$this->flash('Entries have been inserted.',
+				array('controller'=>"entries",
+				'action'=>"add",$nextTransId));
+			}
+			else {
+				debug($this->data);
+			}
+		}
     }
 
     public function view($date1=NULL) {

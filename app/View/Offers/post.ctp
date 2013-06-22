@@ -30,8 +30,7 @@
             $offer['Account']['name_chi'],
             $offer['Member']['name'],
             $this->Number->format($offer['Offer']['amount'], $numberOptions),
-            $this->Html->link(__('Edit'), array('action'=>'edit', 'admin'=>true, $offer['Offer']['id']))
-//            $offer['Offer']['posted']
+            $offer['Offer']['posted']
             ),
             array('class'=>''),array('class'=>'altrow'),
                 true /* useCount */);
@@ -44,6 +43,11 @@
     ));
 ?>
 </table>
+<?php
+	echo $this->Form->create(),
+	$this->Form->input('Offer.account_id', array('options'=>$accounts, 'label'=>'Post to')),
+	$this->Form->end(__('Post'));
+?>
 <nav>
 <?php echo $this->Html->link(__('Post'), array('action'=>'post', $date1));?>
 </nav>
