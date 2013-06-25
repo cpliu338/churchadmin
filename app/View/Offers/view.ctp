@@ -11,7 +11,9 @@
     $oName = '';
     $total = 0;
     $subtotal = 0;
+    $nUnposted = 0;
     foreach ($offers as $offer) {
+    	if (!$offer['Offer']['posted']) $nUnposted++;
         if ($oId != $offer['Account']['id']) {
             if ($oId != 0) {
                 echo $this->Html->tableHeaders(array($oName,
@@ -30,8 +32,8 @@
             $offer['Account']['name_chi'],
             $offer['Member']['name'],
             $this->Number->format($offer['Offer']['amount'], $numberOptions),
-            $this->Html->link(__('Edit'), array('action'=>'edit', 'admin'=>true, $offer['Offer']['id']))
-//            $offer['Offer']['posted']
+            $this->Html->link(__('Edit'), array('action'=>'edit', 'admin'=>$offer['Offer']['posted'], 
+            	$offer['Offer']['id']))
             ),
             array('class'=>''),array('class'=>'altrow'),
                 true /* useCount */);
@@ -44,6 +46,8 @@
     ));
 ?>
 </table>
+<?php if ($nUnposted > 0): ?> 
 <nav>
 <?php echo $this->Html->link(__('Post'), array('action'=>'post', $date1));?>
 </nav>
+<?php endif; ?>

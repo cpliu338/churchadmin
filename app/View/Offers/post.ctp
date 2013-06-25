@@ -6,7 +6,7 @@
     echo "<style>.column-3 { text-align:right; width: 100px}</style>";
     $this->end();
     echo $this->Html->tableHeaders(array(__('Account'),
-        __('Name'),array(__('Amount') => array('class' => 'column-3')),__('Action')));
+        __('Name'),array(__('Amount') => array('class' => 'column-3'))));
     $oId = 0;
     $oName = '';
     $total = 0;
@@ -44,10 +44,9 @@
 ?>
 </table>
 <?php
-	echo $this->Form->create(),
-	$this->Form->input('Offer.account_id', array('options'=>$accounts, 'label'=>'Post to')),
-	$this->Form->end(__('Post'));
+	if ($total > 0.01) { 
+		echo $this->Form->create(),
+		$this->Form->input('Offer.account_id', array('options'=>$accounts, 'label'=>'Post to')),
+		$this->Form->end(__('Post'));
+	}
 ?>
-<nav>
-<?php echo $this->Html->link(__('Post'), array('action'=>'post', $date1));?>
-</nav>
