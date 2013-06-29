@@ -88,11 +88,11 @@ class EntriesController  extends AppController {
         $this->render('/Elements/ajax_amount');
     }
     
-/**
- * index method
- *
- * @return void
- */
+	/**
+	 * index method
+	 *
+	 * @return void
+	 */
 	public function index() {
 		$st_date = '';
 		if ($this->request->is('post')) {
@@ -280,7 +280,7 @@ class EntriesController  extends AppController {
                     }
         } 
 //                else {
-                $options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
+			$options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
                 $this->request->data = $this->Entry->find('first', $options);
                 $this->set("entries", $this->Entry->find('all', array(
                     'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
@@ -317,6 +317,36 @@ class EntriesController  extends AppController {
 	}
 	
 	public function admin_index() {
+		$this->index();
+		$this->render('index');
+	}
+    
+	public function admin_edit($id = null) {
+        if (!$this->Entry->exists($id)) {
+                throw new NotFoundException(__('Invalid entry'));
+        }
+        //$this->set('options', $this->ac_types);
+        if ($this->request->is('post') || $this->request->is('put')) {
+        	debug($this->data);
+			if (!preg_match('/^20\d\d\-\d\d-\d\d$/', $this->data['Entry']['date1'])) {
+				$this->Entry->validationErrors['date1'] = "Invalidate date";
+			}
+			$options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
+			$this->request->data = $this->Entry->find('first', $options);
+			$this->set("entries", $this->Entry->find('all', array(
+                    'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
+                )));
+        }
+        else {
+        	$this->edit($id);
+        }
+        	$this->render('admin_edit');
+	}
+	
+	/**
+		Renamed on Jun 29 2013, delete if found no use after 3 months
+	*/
+	public function admin_index2() {
 		$st_date = '';
 		$detail = '';
 		if ($this->request->is('ajax')) {
