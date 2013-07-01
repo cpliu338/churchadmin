@@ -325,22 +325,30 @@ class EntriesController  extends AppController {
         if (!$this->Entry->exists($id)) {
                 throw new NotFoundException(__('Invalid entry'));
         }
-        //$this->set('options', $this->ac_types);
         if ($this->request->is('post') || $this->request->is('put')) {
-        	debug($this->data);
+			$data = $this->Entry->findById($id);
 			if (!preg_match('/^20\d\d\-\d\d-\d\d$/', $this->data['Entry']['date1'])) {
 				$this->Entry->validationErrors['date1'] = "Invalidate date";
+				return;
 			}
-			$options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
-			$this->request->data = $this->Entry->find('first', $options);
+			$data['Entry']['extra1'] = $this->data['Entry']['extra1'];
+			$this->Entry->save($data);
+			if ($data['Entry']['date1'] != $this->data['Entry']['date1']) {
+				$date2=$this->data['Entry']['date1'];        	
+				$this->Entry->updateAll(
+					array('Entry.date1'=>"'$date2'"),
+					array('Entry.transref'=>$data['Entry']['transref'])
+				);
+			}
+			$this->set("entry", $data); 
 			$this->set("entries", $this->Entry->find('all', array(
-                    'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
+                    'conditions'=>array('Entry.transref'=>$data['Entry']['transref'])
                 )));
+			$this->Session->setFlash(__('Saved'));
         }
         else {
         	$this->edit($id);
         }
-        	$this->render('admin_edit');
 	}
 	
 	/**
