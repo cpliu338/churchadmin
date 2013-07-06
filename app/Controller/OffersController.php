@@ -246,18 +246,26 @@ class OffersController extends AppController {
 		}
     }
 
-    public function view($date1=NULL) {
+    public function view($date1=null) {
         if (!preg_match('/^20[0-9]{2}-[0-1]?[0-9]-[0-3]?[0-9]$/',$date1)) {
             throw new NotFoundException(__('Invalid')+" $date1");
         }
         $this->set('date1', $date1);
-        $this->set('offers',
-            $this->Offer->find('all', array(
-                'conditions'=>array('Offer.date1'=>$date1),
-                'order'=>'Account.code'
-            ))
+        $offers = $this->Offer->find('all', array(
+        	'fields'=>array('Offer.id','Offer.posted','Offer.amount','Offer.date1',
+        		'Member.name',
+        		'Account.id','Account.name_chi','Account.name'
+			),
+			'conditions'=>array('Offer.date1'=>$date1),
+			'order'=>'Account.code'
+		));
+        $this->set('offers',$offers
         );
         $this->set('isAdmin', $this->isLevelEnough(90));
+        if ($this->RequestHandler->isXml()) {
+        	Configure::write('debug', 0);
+        	//$this->set('_serialize','offers');
+        }
     }    
     /**
      * List all offers

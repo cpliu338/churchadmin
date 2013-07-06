@@ -316,9 +316,24 @@ class EntriesController  extends AppController {
 		$this->redirect(array('action' => 'index'));
 	}
 	
+	/**
+	If Restful, /choffice/admin/entries?upto=2013-05-31 fetches entries between Jan 1 to May 31
+	*/
 	public function admin_index() {
-		$this->index();
-		$this->render('index');
+		if ($this->RequestHandler->isXml()) {
+			//debug($this->request->query['upto']);
+			$entries = $this->Entry->find('all', array(
+				'conditions'=>array('Entry.date1 <='=>$this->request->query['upto'],
+					'Entry.date1 >='=>$this->Entry->getYearStart($this->request->query['upto'])
+				),
+			));
+			$this->set('entries',$entries);
+			//$this->set('_serialize','entries');
+		}
+		else {
+			$this->index();
+			$this->render('index');
+		}
 	}
     
 	public function admin_edit($id = null) {
