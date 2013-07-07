@@ -6,14 +6,12 @@
     echo "<style>.column-3 { text-align:right; width: 100px}</style>";
     $this->end();
     echo $this->Html->tableHeaders(array(__('Account'),
-        __('Name'),array(__('Amount') => array('class' => 'column-3')),__('Action')));
+        __('Name'),array(__('Amount') => array('class' => 'column-3'))));
     $oId = 0;
     $oName = '';
     $total = 0;
     $subtotal = 0;
-    $nUnposted = 0;
     foreach ($offers as $offer) {
-    	if (!$offer['Offer']['posted']) $nUnposted++;
         if ($oId != $offer['Account']['id']) {
             if ($oId != 0) {
                 echo $this->Html->tableHeaders(array($oName,
@@ -32,8 +30,7 @@
             $offer['Account']['name_chi'],
             $offer['Member']['name'],
             $this->Number->format($offer['Offer']['amount'], $numberOptions),
-            $this->Html->link(__('Edit'), array('action'=>'edit', 'admin'=>$offer['Offer']['posted'], 
-            	$offer['Offer']['id']))
+            $offer['Offer']['posted']
             ),
             array('class'=>''),array('class'=>'altrow'),
                 true /* useCount */);
@@ -46,8 +43,10 @@
     ));
 ?>
 </table>
-<?php if ($nUnposted > 0): ?> 
-<nav>
-<?php echo $this->Html->link(__('Post'), array('action'=>'post', $date1));?>
-</nav>
-<?php endif; ?>
+<?php
+	if ($total > 0.01) { 
+		echo $this->Form->create(),
+		$this->Form->input('Offer.account_id', array('options'=>$accounts, 'label'=>'Post to')),
+		$this->Form->end(__('Post'));
+	}
+?>

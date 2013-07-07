@@ -55,7 +55,13 @@ class MembersController extends AppController {
  */
 	public function index() {
 		$this->Member->recursive = 0;
-		$this->set('members', $this->paginate());
+		$filter = '%';
+		if ($this->request->is('post')) {
+			$filter = '%'.trim($this->data['Member']['name']).'%';
+		}
+		$this->set('members', $this->paginate('Member',
+			array('name LIKE'=>$filter)
+			));
 	}
 
 /**
@@ -87,6 +93,21 @@ class MembersController extends AppController {
 			} else {
 				$this->Session->setFlash(__('The member could not be saved. Please, try again.'));
 			}
+		}
+		else {
+			$raw = $this->Member->find('all',array(
+				'fields'=>'DISTINCT (Member.groupname) AS groupname2',
+				'order'=>'groupname2'	
+				));
+			$groups = array();
+			foreach ($raw as $entry) {
+				$name = $entry['Member']['groupname2'];
+				$groups[$name] = $name;
+			}
+			$this->set('groups',
+				//$this->Member->find('list',array('limit'=>5)				
+					$groups
+			);
 		}
 	}
 
@@ -266,5 +287,24 @@ HELP;
 		}
 		$this->Session->setFlash(__('Member was not deleted'));
 		$this->redirect(array('action' => 'index'));
+	}
+	
+	function suggest() {
+		Configure::write('debug', 0);
+		$val =  $this->params['url']['val'];
+		$raw = $this->Member->find('list',array(
+			'conditions'=>array('Member.name LIKE'=>$val.'%'),
+			'order'=>'Member.name'
+		));
+		//debug($raw);
+		foreach ($raw as $id=>$name) {
+			unset($hash);
+			$hash['When']=$val;
+			$hash['Value'] = $id;
+			$hash['Text'] = $name;
+			$arr[]=$hash;
+		}
+		$this->set('results', $arr);
+		$this->set('_serialize','results');
 	}
 }

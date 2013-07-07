@@ -6,6 +6,8 @@ App::uses('AppController', 'Controller','Number');
  * @property Account $Account
  */
 class AccountsController extends AppController {
+	
+	public $helpers = array('Form', 'Html', 'Js', 'Totalize');
     
     public function beforeFilter() {
         parent::beforeFilter();
@@ -18,6 +20,9 @@ class AccountsController extends AppController {
  * @return void
  */
 	public function index() {
+            $this->loadModel('Entry');
+            $this->set('yearStart', $this->Entry->getYearStart($this->Entry->getStartDate()));
+            $this->set('yearEnd', $this->Entry->getYearEnd($this->Entry->getStartDate()));
             if (array_key_exists('under', $this->request->query) && !empty($this->request->query['under'])) {
                 $under = $this->request->query['under'];
                 if (substr($under, -1)==='0')
@@ -43,37 +48,49 @@ class AccountsController extends AppController {
  * @return void
  */
 	public function view($id = null) {
-            if (!$this->Account->exists($id)) {
-                    throw new NotFoundException(__('Invalid account'));
-            }
-            $this->loadModel('Entry');
-            if ($this->request->is('get')) {
-                $date1 = $this->Entry->getStartDate();
-                $this->request->data('Entry.date1', $date1);
-            }
-            else {
-                $date1 = $this->request->data('Entry.date1');
-                $this->Entry->setStartDate($date1);
-            }
-            $options = array('conditions' => array('Account.' . $this->Account->primaryKey => $id));
-            $account = $this->Account->find('first', $options);
-            $this->set('account', $account);
-            // no joins needed
-            $this->Entry->recursive = 0;
-            $yearStart = $this->Entry->getYearStart($date1);
-            $this->set('yearStart',$yearStart);
-            $pattern = $this->Account->getPatternUnder($account['Account']['code']);
-            $this->set('entries', $this->Entry->find('all', array('limit' => 25, 'conditions'=>array(
-                    'Account.code LIKE'=>$pattern,
-                    'Entry.date1 <='=>$this->Entry->getEndDate($date1),
-                    'Entry.date1 >='=>$date1),
-                'order'=>array('Entry.date1')
-                    )));
-            $this->set('broughtForward', $this->Entry->find('first', array('fields' => 'SUM(amount) AS total', 'conditions' => array(
-                'Account.code LIKE' => $pattern,
-                'Entry.date1 >' => $yearStart,
-                'Entry.date1 <' => $date1)
-            )));
+		if (!$this->Account->exists($id)) {
+				throw new NotFoundException(__('Invalid account'));
+		}
+		$this->loadModel('Entry');
+		if ($this->request->is('get')) {
+			$date1 = $this->Entry->getStartDate();
+			$this->request->data('Entry.date1', $date1);
+		}
+		else {
+			$date1 = $this->request->data('Entry.date1');
+			$this->Entry->setStartDate($date1);
+		}
+		$options = array('conditions' => array('Account.' . $this->Account->primaryKey => $id));
+		$account = $this->Account->find('first', $options);
+		$this->set('account', $account);
+		// no joins needed
+		$this->Entry->recursive = 0;
+		$yearStart = $this->Entry->getYearStart($date1);
+		$this->set('yearStart',$yearStart);
+		$pattern = $this->Account->getPatternUnder($account['Account']['code']);
+		$this->set('entries', $this->Entry->find('all', array('limit' => 25, 'conditions'=>array(
+				'Account.code LIKE'=>$pattern,
+				'Entry.date1 <='=>$this->Entry->getEndDate($date1),
+				'Entry.date1 >='=>$date1),
+			'order'=>array('Entry.date1')
+				)));
+		$this->set('broughtForward', $this->Entry->find('first', array('fields' => 'SUM(amount) AS total', 'conditions' => array(
+			'Account.code LIKE' => $pattern,
+			'Entry.date1 >=' => $yearStart,
+			'Entry.date1 <' => $date1)
+		)));
+		$breadCrumb = $this->Account->getBreadCrumb($account['Account']['code']);
+		//debug($breadCrumb);
+		if (count($breadCrumb)>1) {
+			$this->set('breadCrumb', $this->Account->find('all', array(
+			'conditions'=>array('Account.code IN'=>$breadCrumb
+			))));
+		}
+		else if (count($breadCrumb)==1) {
+			$this->set('breadCrumb', $this->Account->find('all', array(
+			'conditions'=>array('Account.code'=>$breadCrumb[0]
+			))));
+		}
 	}
 
 /**

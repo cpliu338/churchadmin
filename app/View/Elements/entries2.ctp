@@ -21,7 +21,7 @@
             $entry['Entry']['date1'],
             $this->Html->link($entry['Entry']['transref'],
                 array('controller'=>'entries','action'=>'edit',$entry['Entry']['id'])),
-            $entry['Account']['name_chi'],
+            $this->Html->link($entry['Account']['name_chi'], array('action'=>'view',$entry['Account']['id'])),
             $this->Number->format($entry['Entry']['amount'] * $factor, $numberOptions),
             $this->Number->format($tot, $numberOptions),
             $entry['Entry']['detail'],

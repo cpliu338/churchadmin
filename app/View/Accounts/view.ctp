@@ -12,6 +12,13 @@ SCRIPT;
 ?>
 <h2><?php echo $account['Account']['code'], $account['Account']['name_chi'];?></h2>
 <?php
+	if (!empty($breadCrumb)) {
+		echo '<div class="nav">';
+		foreach ($breadCrumb as $ac) {
+			echo $this->Html->link($ac['Account']['name_chi'],array($ac['Account']['id'])),' > ';
+		}
+		echo '</div>';
+	}
 	echo $this->Form->create('Entry'), 
 		$this->Form->input('date1', array('label'=>__('Since'),'type'=>'text')),
 		"</form>";

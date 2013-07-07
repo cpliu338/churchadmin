@@ -8,7 +8,7 @@ App::uses('Js','Helper');
  * @author Administrator
  */
 class EntriesController  extends AppController {
-	public $helpers = array('Js' => array('Jquery'));
+	public $helpers = array('Number','Js' => array('Jquery'));
 	
 	public $paginate = array(
 			'fields' => array('Entry.id', 'Entry.transref','Entry.amount','Entry.detail',
@@ -54,11 +54,45 @@ class EntriesController  extends AppController {
 		$this->set('_serialize','nextCheque');
     }
     
-/**
- * index method
- *
- * @return void
- */
+    function totalize($code) {
+        $this->layout='ajax';
+        if ($this->request->is('ajax'))
+            Configure::write('debug', 0);
+        $code2 = $code;
+        if (substr($code, -1)=='0') {
+            $code2[strlen($code)-1]='%';
+        }
+        $subcodes = array();
+        foreach ($this->Entry->Account->find('list', array(
+            'conditions'=>array('Account.code LIKE'=>$code2)
+            )) as $id=>$name) {
+                array_push($subcodes, $id);
+        }
+        $conditions = array(
+            'Entry.date1 >='=>$this->Entry->getYearStart($this->Entry->getStartDate()),
+            'Entry.date1 <='=>$this->Entry->getYearEnd($this->Entry->getStartDate())
+        );
+        switch (count($subcodes)) {
+            case 0: $conditions['Entry.account_id']=FALSE; break;
+            case 1: $conditions['Entry.account_id']=$subcodes[0]; break;
+            default: $conditions['Entry.account_id IN']=$subcodes;
+        }
+        $result = $this->Entry->find("first",array(
+            'fields'=>'SUM(Entry.amount) AS sum',
+            'conditions'=>$conditions
+        ));
+        //debug($conditions);
+        $total = (empty($result[0]['sum'])) ? "No record" : $result[0]['sum'];
+        $this->set('amt', $total);
+//        $this->set('_serialize','total');
+        $this->render('/Elements/ajax_amount');
+    }
+    
+	/**
+	 * index method
+	 *
+	 * @return void
+	 */
 	public function index() {
 		$st_date = '';
 		if ($this->request->is('post')) {
@@ -246,7 +280,7 @@ class EntriesController  extends AppController {
                     }
         } 
 //                else {
-                $options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
+			$options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
                 $this->request->data = $this->Entry->find('first', $options);
                 $this->set("entries", $this->Entry->find('all', array(
                     'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
@@ -282,7 +316,60 @@ class EntriesController  extends AppController {
 		$this->redirect(array('action' => 'index'));
 	}
 	
+	/**
+	If Restful, /choffice/admin/entries?upto=2013-05-31 fetches entries between Jan 1 to May 31
+	*/
 	public function admin_index() {
+		if ($this->RequestHandler->isXml()) {
+			//debug($this->request->query['upto']);
+			$entries = $this->Entry->find('all', array(
+				'conditions'=>array('Entry.date1 <='=>$this->request->query['upto'],
+					'Entry.date1 >='=>$this->Entry->getYearStart($this->request->query['upto'])
+				),
+			));
+			$this->set('entries',$entries);
+			//$this->set('_serialize','entries');
+		}
+		else {
+			$this->index();
+			$this->render('index');
+		}
+	}
+    
+	public function admin_edit($id = null) {
+        if (!$this->Entry->exists($id)) {
+                throw new NotFoundException(__('Invalid entry'));
+        }
+        if ($this->request->is('post') || $this->request->is('put')) {
+			$data = $this->Entry->findById($id);
+			if (!preg_match('/^20\d\d\-\d\d-\d\d$/', $this->data['Entry']['date1'])) {
+				$this->Entry->validationErrors['date1'] = "Invalidate date";
+				return;
+			}
+			$data['Entry']['extra1'] = $this->data['Entry']['extra1'];
+			$this->Entry->save($data);
+			if ($data['Entry']['date1'] != $this->data['Entry']['date1']) {
+				$date2=$this->data['Entry']['date1'];        	
+				$this->Entry->updateAll(
+					array('Entry.date1'=>"'$date2'"),
+					array('Entry.transref'=>$data['Entry']['transref'])
+				);
+			}
+			$this->set("entry", $data); 
+			$this->set("entries", $this->Entry->find('all', array(
+                    'conditions'=>array('Entry.transref'=>$data['Entry']['transref'])
+                )));
+			$this->Session->setFlash(__('Saved'));
+        }
+        else {
+        	$this->edit($id);
+        }
+	}
+	
+	/**
+		Renamed on Jun 29 2013, delete if found no use after 3 months
+	*/
+	public function admin_index2() {
 		$st_date = '';
 		$detail = '';
 		if ($this->request->is('ajax')) {
