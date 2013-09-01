@@ -1,6 +1,6 @@
 <?php
 
-class Entry extends AppModel {
+class Attendance extends AppModel {
     
 /**
  * belongsTo associations

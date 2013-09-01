@@ -260,7 +260,7 @@ foreach ($raw as $acc) {
 	$hash['Text'] = $acc['Account']['name_chi'];
 	$arr[]=$hash;
 }
-//debug($arr);
+debug($arr);
 $this->set('results', $arr);
 $this->set('_serialize','results');
 //		$this->layout = 'js/js1';
