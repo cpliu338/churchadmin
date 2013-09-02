@@ -41,12 +41,14 @@ class AttendancesController extends AppController {
             $t = date('Y-m-d H:i:s');
             $rec['Attendance']['time1'] = $t; 
             if ($this->Attendance->save($rec)) {
-            	$result = "Added $t";
+        	// only time portion
+            	$result = substr($t,10);
             }
             else {
             	$result = "Failed";
             }
-            $json = json_encode(array('note'=>$result,'imgid'=>"#img".substr($v2['Id'],3)));
+            $json = json_encode(array('note'=>$result,'imgid'=>"#img".substr($v2['Id'],3),
+            	'msgid'=>"#msg".substr($v2['Id'],3)));
             $this->response->body($json);
         }
     }

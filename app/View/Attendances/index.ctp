@@ -32,9 +32,17 @@ function prtGrpEnd() {
     	}
         $memberid = $member['member2']['id'];
         $name = $member['member2']['name'];
-        $time = empty($member['t2']['time1']) ? '' : $member['t2']['time1'];
-        echo '<td>',$this->Html->image("http://therismos.dyndns.org:8080/choffice/members/card.jsf?primefacesDynamicContent=streamedBean.photo&id=$memberid",
-        	array('id'=>"img$memberid",  'class'=>'c1')), 
+        if (empty($member['t2']['time1'])) {
+        	$time = '';
+        	$cl = 'c1';
+        }
+        else {
+        	// only time portion
+        	$time = substr($member['t2']['time1'],10);
+        	$cl = 'c2';
+        }
+        echo '<td>',$this->Html->image("http://therismos.dyndns.org/photos/$memberid.jpg",
+        	array('id'=>"img$memberid",  'class'=>$cl)), 
         "$name<br/><a class='but' href='#' id='pos$memberid'>Change</a><br/>",
         "<span id='msg$memberid'>$time</span></td>";
         $c++;
@@ -61,6 +69,7 @@ $script=<<<SCRIPT
             contentType: "application/json; charset=utf-8",
             success: function (data) {
                 $('#note').html(data.note);
+                $(data.msgid).html(data.note);
                 $(data.imgid).removeClass('c1');
                 $(data.imgid).addClass('c2');
             }
