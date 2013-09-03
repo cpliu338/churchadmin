@@ -63,15 +63,15 @@ $script=<<<SCRIPT
         var value = $(this).val(); 
         $.ajax({
             type: "POST",
-            url: "/choffice/attendances/toggle",
+            url: "$here/toggle",
             data: '{"Id": "' + id + '", "Value": "' + value + '"}',
             dataType: "json",
             contentType: "application/json; charset=utf-8",
             success: function (data) {
-                $('#note').html(data.note);
-                $(data.msgid).html(data.note);
-                $(data.imgid).removeClass('c1');
-                $(data.imgid).addClass('c2');
+                $('#note').html(data.result);
+                $(data.msgid).html(data.timestamp);
+                $(data.imgid).removeClass(data.oldClass);
+                $(data.imgid).addClass(data.newClass);
             }
         });
 SCRIPT;
