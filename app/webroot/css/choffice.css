@@ -18,3 +18,11 @@ form#inline label {
    display: inline;
    font-size: 100%;
 }
+.c1 {
+	opacity: 1.0;
+	float: left
+}
+.c2 {
+	opacity: 0.4;
+	float: left
+}
