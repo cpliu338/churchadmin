@@ -3,6 +3,7 @@
     echo $this->Html->script(Configure::read('Js.jquery-ui'), array('inline'=>false));
     echo $this->Html->css(Configure::read('Css.jquery-ui'), 'stylesheet', array('inline'=>false));
 ?>
+<h2 id="note">Ready</h2>
 <div id='accordion'>
 <?php
 function prtGrpStart($grp) {
@@ -41,16 +42,17 @@ function prtGrpEnd() {
         	$time = substr($member['t2']['time1'],10);
         	$cl = 'c2';
         }
+        // width=240, alt=name
+        $refresh = $this->Html->image('refresh.jpg', array('width'=>40));
         echo '<td>',$this->Html->image("http://therismos.dyndns.org/photos/$memberid.jpg",
-        	array('id'=>"img$memberid",  'class'=>$cl)), 
-        "$name<br/><a class='but' href='#' id='pos$memberid'>Change</a><br/>",
+        	array('id'=>"img$memberid",  'width'=>101, 'alt'=>$name, 'class'=>$cl)), 
+        "<span>$name</span><a class='but' href='#' id='pos$memberid'>$refresh</a><br/>",
         "<span id='msg$memberid'>$time</span></td>";
         $c++;
     }
     prtGrpEnd();
 ?>
 </div> <!-- of accordion-->
-<div id="note"></div>
 <?php
 $script2=<<<SCRIPT2
 $(function() {
@@ -60,7 +62,7 @@ SCRIPT2;
 	echo $this->Html->scriptBlock($script2, array('inline'=>false));
 $script=<<<SCRIPT
         var id = $(this).attr('id'); 
-        var value = $(this).val(); 
+        var value = $(this).prev().html(); 
         $.ajax({
             type: "POST",
             url: "$here/toggle",
