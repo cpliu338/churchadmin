@@ -25,6 +25,8 @@ class AttendancesController extends AppController {
         $records = $this->Attendance->query("select member2.id,member2.name,member2.groupname,t2.time1 from (select id,name,groupname from members where groupname in ('Telepathy','茶傾','Bridge')) as member2 left join (select member_id,time1 from attendances where attendances.time1 like '$today%') as t2 on member2.id = t2.member_id order by member2.groupname limit 10");
         $this->set('members', $records);
         $this->set('here',$this->request->here);
+//        $found = ($this->Attendance->find('list',array('conditions'=>array("Attendance.id"=>16007))));
+//        debug($found);
     }
     
     public function toggle() {
@@ -59,6 +61,13 @@ class AttendancesController extends AppController {
             $ret['msgid']= "#msg".substr($v2['Id'],3);
             $json = json_encode($ret);
             $this->response->body($json);
+        }
+        else { // for debug use only
+            $cond = array('Attendance.time1 LIKE' => substr('2013-09-03 13:00:00', 0, 10).'%',
+                'Attendance.member_id'=>34);
+            $found = $this->Attendance->find('list',array('conditions'=>$cond));
+            $this->Attendance->deleteAll(array('Attendance.id'=>array_keys($found)));
+            $this->render('index');
         }
     }
 }

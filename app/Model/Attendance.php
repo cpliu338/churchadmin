@@ -21,7 +21,7 @@ class Attendance extends AppModel {
             if ($timestamp == null) {
                 $timestamp = date('Y-m-d H:i:s');
             }
-            $ret['timestamp'] = $timestamp;
+            $ret['timestamp'] = substr($timestamp,10);
             $cond = array('Attendance.time1 LIKE' => substr($timestamp, 0, 10).'%',
                 'Attendance.member_id'=>$id);
             $found = $this->find('list',array('conditions'=>$cond));
@@ -34,7 +34,8 @@ class Attendance extends AppModel {
             }
             else {
                 $ret['timestamp'] = '';
-                $ret['result'] = $this->deleteAll(array('Attendance.id IN'=>array_keys($found))) ?
+                $ret['result'] = 
+                        $this->deleteAll(array('Attendance.id'=>array_keys($found))) ?
                         'deleted' : 'failure';
             }
             return $ret;
