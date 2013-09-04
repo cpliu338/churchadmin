@@ -26,7 +26,7 @@
 Configure::write('Js.jquery', "//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js");
 Configure::write('Js.jquery-ui', "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js");
 Configure::write('Css.jquery-ui', "//code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css");
-Configure::write("Attendance.groups","('Telepathy','茶傾','Bridge','以斯帖')"); 
+Configure::write("exclude.groups","('special','天家')"); 
 // Setup a 'default' cache configuration for use in the application.
 Cache::config('default', array('engine' => 'File', 'duration' => '+1 week'));
 
