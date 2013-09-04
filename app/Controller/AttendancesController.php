@@ -22,7 +22,11 @@ class AttendancesController extends AppController {
             )
         );
         $today = date('Y-m-d');
-        $records = $this->Attendance->query("select member2.id,member2.name,member2.groupname,t2.time1 from (select id,name,groupname from members where groupname in ('Telepathy','茶傾','Bridge')) as member2 left join (select member_id,time1 from attendances where attendances.time1 like '$today%') as t2 on member2.id = t2.member_id order by member2.groupname limit 10");
+		$groups = Configure::read('Attendance.groups');
+        $records = $this->Attendance->query("select member2.id,member2.name,member2.groupname,t2.time1 from (select id,name,groupname from members " . 
+        	"where groupname in $groups) as member2 ".
+        	"left join (select member_id,time1 from attendances where attendances.time1 like '$today%') as t2 ".
+        	"on member2.id = t2.member_id order by member2.groupname");
         $this->set('members', $records);
         $this->set('here',$this->request->here);
 //        $found = ($this->Attendance->find('list',array('conditions'=>array("Attendance.id"=>16007))));
@@ -33,6 +37,7 @@ class AttendancesController extends AppController {
         if ($this->request->is('ajax')) {
         	$v2=$this->request->input('json_decode', true);
         	$id = substr($v2['Id'],3);
+        	$name = $v2['Value'];
         	$this->autoRender = false;
         	$this->response->type('json');
             Configure::write('debug', 0);
@@ -52,10 +57,12 @@ class AttendancesController extends AppController {
             if ($ret['result']=='added') {
                 $ret['oldClass']='c1';
                 $ret['newClass']='c2';
+                $ret['result']="已加入$name";
             }
             else if ($ret['result']=='deleted') {
                 $ret['oldClass']='c2';
                 $ret['newClass']='c1';
+                $ret['result']="已刪除$name";
             }
             $ret['imgid']= "#img".substr($v2['Id'],3);
             $ret['msgid']= "#msg".substr($v2['Id'],3);
