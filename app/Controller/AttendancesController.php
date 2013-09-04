@@ -15,22 +15,24 @@ class AttendancesController extends AppController {
         $this->Auth->Allow('index', 'toggle');
     }
     
-    public function index() {
+    public function index($type=0) {
     	$members = $this->Member->find('all',
             array(
                 'limit'=>8
             )
         );
         $today = date('Y-m-d');
-		$groups = Configure::read('Attendance.groups');
-        $records = $this->Attendance->query("select member2.id,member2.name,member2.groupname,t2.time1 from (select id,name,groupname from members " . 
-        	"where groupname in $groups) as member2 ".
+        $groups = Configure::read('exclude.groups');
+        $field = $type==0 ? 'groupname' : 'LEFT(name,1)';
+        $records = $this->Attendance->query("select member2.id,member2.name,member2.grp,t2.time1 from (select id,name, $field AS grp from members " . 
+        	"where groupname NOT IN $groups) as member2 ".
         	"left join (select member_id,time1 from attendances where attendances.time1 like '$today%') as t2 ".
-        	"on member2.id = t2.member_id order by member2.groupname");
+        	"on member2.id = t2.member_id order by member2.grp");
         $this->set('members', $records);
-        $this->set('here',$this->request->here);
-//        $found = ($this->Attendance->find('list',array('conditions'=>array("Attendance.id"=>16007))));
-//        debug($found);
+        $this->set('type', $type);
+        $this->set('base',$this->request->base);
+        $this->set('total', $this->Attendance->find('count',array('conditions'=>array("Attendance.time1 LIKE"=>"$today%"))));
+//        debug($this->request);
     }
     
     public function toggle() {
@@ -66,6 +68,8 @@ class AttendancesController extends AppController {
             }
             $ret['imgid']= "#img".substr($v2['Id'],3);
             $ret['msgid']= "#msg".substr($v2['Id'],3);
+            $today = date('Y-m-d');
+            $ret['total']= $this->Attendance->find('count',array('conditions'=>array("Attendance.time1 LIKE"=>"$today%")));
             $json = json_encode($ret);
             $this->response->body($json);
         }
