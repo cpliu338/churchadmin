@@ -44,8 +44,9 @@ class AppController extends Controller {
     );
     
 	public function isLevelEnough($lev) {
-		$user = $this->Auth->user();
-		return $user['level']>=$lev;
+            $user = $this->Auth->user();
+            if (empty($user)) return false;
+            return $user['level']>=$lev;
 	}
 	
 	public function beforeFilter() {
