@@ -12,7 +12,9 @@ class AttendancesController extends AppController {
     
     public function beforeFilter() {
         parent::beforeFilter();
-        $this->Auth->Allow('index', 'toggle');
+        if (substr($this->request->clientIp(TRUE),0,4)==='192.')
+//        debug($this->Auth->user());
+            $this->Auth->Allow('index', 'toggle');
     }
     
     public function index($type=0) {
