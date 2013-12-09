@@ -17,7 +17,7 @@ class MembersController extends AppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow('admin_view');
+		$this->Auth->allow('admin_view','login');
 	}
 	
 	function logout() {
