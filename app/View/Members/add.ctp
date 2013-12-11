@@ -1,6 +1,6 @@
 <?php 	echo $this->element('menu', array('toggle'=>$toggle)); ?>
 <?php
-	debug($groups);
+	//debug($groups);
 	echo $this->Form->Create('Member'),
 	$this->Form->input('Member.name'),
 	'Group',

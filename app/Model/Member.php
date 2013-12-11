@@ -12,6 +12,7 @@ class Member extends AppModel {
  * @var string
  */
 	public $displayField = 'name';
+	public $validate = array('name' => 'isUnique');
 	
 	public function beforeSave() {
 		if (isset($this->data['Member']['pwd'])) {
