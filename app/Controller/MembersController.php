@@ -17,7 +17,7 @@ class MembersController extends AppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow('admin_view','login');
+		$this->Auth->allow('admin_view');
 	}
 	
 	function logout() {
@@ -240,8 +240,8 @@ HELP;
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
 			// overwrite readonly fields
-			$this->request->data('Member.id', $member['Member']['id'])
-				->data('Member.name', $member['Member']['name']);
+			$this->request->data('Member.id', $member['Member']['id']);
+				//->data('Member.name', $member['Member']['name']);
 			// reset password?
 			if ($this->data['Member']['print']) {
 				// handled by beforeSave $password = Security::hash($this->data['Member']['pwd'], 'md5', false);
