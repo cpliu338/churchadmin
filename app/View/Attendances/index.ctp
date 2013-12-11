@@ -7,7 +7,9 @@
     <span id="note">Total: <?php echo $total;?></span>
     <span style="float:right"><?php echo $this->Html->link(
         $type==0 ? '按姓氏' : '按組別',
-        array('action'=>'index',$type==0 ?1:0));?></span>
+        array('action'=>'index',$type==0 ?1:0));
+    echo ' | ', $this->Html->link('Barcode',array('action'=>'barcode'));
+    ?></span>
 </h2>
 <?php
 function tabStart($id) {
