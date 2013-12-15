@@ -117,7 +117,8 @@ class AttendancesController extends AppController {
     		// GET or POST will run the following
     			$this->set('cnt',$this->Attendance->find('count',array('conditions'=>array('Attendance.time1 LIKE'=>"$today%")))
     				);
-				$records = $this->Attendance->find('all',array('conditions'=>array('Attendance.time1 LIKE'=>"$today%")));
+				$records = $this->Attendance->find('all',array('order'=>array('Attendance.time1 DESC'),
+'conditions'=>array('Attendance.time1 LIKE'=>"$today%")));
 				$this->set('attendances', $records);
 				$this->set('base',$this->request->base);
 		}
