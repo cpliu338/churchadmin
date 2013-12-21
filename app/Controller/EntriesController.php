@@ -34,7 +34,7 @@ class EntriesController  extends AppController {
     public function beforeFilter() {
         parent::beforeFilter();
         $this->set('numberOptions', $this->numberOptions);
-        $this->Auth->allowedActions=array('setNextCheque');
+        $this->Auth->allowedActions=array('setNextCheque','download');
     }
 
 	/**
@@ -158,7 +158,6 @@ class EntriesController  extends AppController {
             $this->Session->setFlash(__("Updated %d entries", $cnt));
             $this->redirect(array('action'=>'vet',$id));
         }
-            //$this->set('transaction', $this->Entry->find('first', $options));
     }
 
     public function create() {
@@ -221,7 +220,7 @@ class EntriesController  extends AppController {
 			'Entry.transref'=>$transref)
 			));
         if (empty($entries)) {
-                throw new NotFoundException(__('Invalid transaction reference'));
+                throw new NotFoundException(__('Invalid entry reference'));
         }
         $this->set('options', $this->ac_types);
 		$this->set('entries', $entries);
@@ -240,10 +239,10 @@ class EntriesController  extends AppController {
 			$this->request->data('Entry.date1',$entry['Entry']['date1']);
 			$this->request->data('Entry.transref',$entry['Entry']['transref']);
 			if ($this->Entry->save($this->request->data)) {
-				$this->Session->setFlash(__('The transaction has been saved'));
+				$this->Session->setFlash(__('The entry has been saved'));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(__('The transaction could not be saved. Please, try again.'));
+				$this->Session->setFlash(__('The entry could not be saved. Please, try again.'));
 				$this->render('edit');
 			}
 		}
@@ -305,7 +304,7 @@ class EntriesController  extends AppController {
 	public function delete($id = null) {
 		$this->Entry->id = $id;
 		if (!$this->Entry->exists()) {
-			throw new NotFoundException(__('Invalid transaction'));
+			throw new NotFoundException(__('Invalid entry'));
 		}
 		$this->request->onlyAllow('post', 'delete');
 		if ($this->Entry->delete()) {
@@ -364,6 +363,17 @@ class EntriesController  extends AppController {
         else {
         	$this->edit($id);
         }
+	}
+	
+	public function download($endDate) {
+		if (!preg_match('/^(20\d\d)-\d{1,2}-\d{1,2}$/', $endDate, $matches))
+			throw new NotFoundException();
+		$this->set("entries", $this->Entry->find('all', array(
+			'fields' => array('Entry.amount', 'Entry.account_id', 'Entry.date1'),
+			'conditions'=>array('Entry.date1 <'=>$endDate, 'Entry.date1 >='=>'2013-01-01'),
+			'order'=>array('Entry.date1')
+                )));
+        $this->set('_serialize',array('entries'));
 	}
 	
 	/**
