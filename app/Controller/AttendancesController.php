@@ -100,7 +100,7 @@ class AttendancesController extends AppController {
 				}
         	}
         	else {
-        		$ret['text']='Duplicated';
+        		$ret['text']='.';//Duplicated';
         	}
             $json = json_encode($ret);
             $this->response->body($json);

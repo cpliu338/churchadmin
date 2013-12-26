@@ -133,14 +133,23 @@ class EntriesController  extends AppController {
         if (!$this->Entry->Account->exists($id)) {
                 throw new NotFoundException(__('Invalid account'));
         }
-        $this->set('entries', $this->Entry->find('all',
+        $signed = $this->Entry->find('all',
             array('conditions' => array('Entry.account_id' => $id,
                     'Entry.extra1 LIKE'=>'$%'),
                 'order'=>'Entry.extra1')
-                    ));
+                    );
+        $this->set('entries', $signed);
+        /*
+            array('conditions' => array('Entry.account_id' => $id,
+                    'Entry.extra1 LIKE'=>'$%'),
+                'order'=>'Entry.extra1')
+                    )); */
+        $tot = 0;
+        foreach ($signed as $a) {
+        	$tot += $a['Entry']['amount'];
+        }
+        $this->set('total', $tot);
         if ($this->request->is('post')) {
-//            foreach ($this->data['EntryId'] as $id)
-//                debug($id);
             if (!empty($this->data['EntryId']))
                 $cnt = count($this->data['EntryId']);
             else
