@@ -12,6 +12,7 @@ class AccountsController extends AppController {
     public function beforeFilter() {
         parent::beforeFilter();
         $this->set('numberOptions', $this->numberOptions);
+        $this->Auth->allowedActions=array('download');
     }
 
 /**
@@ -167,18 +168,43 @@ class AccountsController extends AppController {
 	}
 
 /**
- * admin_view method
+ * download method - Restful download for bank reconciliation
  *
  * @throws NotFoundException
  * @param string $id
  * @return void
  */
-	public function admin_view($id = null) {
+	public function download($id = null) {
 		if (!$this->Account->exists($id)) {
-			throw new NotFoundException(__('Invalid account'));
+				throw new NotFoundException(__('Invalid account'));
 		}
-		$options = array('conditions' => array('Account.' . $this->Account->primaryKey => $id));
-		$this->set('account', $this->Account->find('first', $options));
+		$this->loadModel('Entry');
+		if (array_key_exists('date1',$this->request->query)) {
+			$date1 = $this->request->query['date1'];
+			if (!preg_match('/^(20\d\d)-\d{1,2}-\d{1,2}$/', $date1, $matches))
+				$date1 = $this->Entry->getStartDate();
+		}
+		else {
+			$date1 = $this->Entry->getStartDate();
+		}
+		$this->Entry->recursive = 0;
+		$yearStart = $this->Entry->getYearStart($date1);
+		$this->set('start',$yearStart);
+		$this->set('end',$date1);
+		$this->set('bookBalance', $this->Entry->find('first', array('fields' => 'SUM(amount) AS total', 'conditions' => array(
+			'Account.id'=>$id,
+			'Entry.date1 >=' => $yearStart,
+			'Entry.date1 <=' => $date1)
+		)));
+		$this->set('pending', $this->Entry->find('all', array(
+			'fields' => array('Entry.id','Entry.amount','Entry.extra1'),//'SUM(amount) AS total', 
+			'conditions' => array(
+//$this->Entry->find('all', array('conditions'=>array(
+			'Account.id'=>$id,
+			'Entry.extra1 LIKE'=>'$%',
+			'Entry.date1 <=' => $date1)
+		)));
+		$this->set('_serialize',array('start','end','bookBalance','pending'));
 	}
 
 /**
