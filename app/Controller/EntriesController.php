@@ -108,7 +108,7 @@ class EntriesController  extends AppController {
 		$this->set('end_date',$end_date);
 		$this->paginate = array(
 			'fields' => array('Entry.id', 'Entry.transref','Entry.amount','Entry.detail','Entry.extra1',
-				'Entry.date1', 'Account.name','Account.name_chi'),
+				'Entry.date1', 'Account.name','Account.name_chi','Account.id'),
 				'conditions' => array(
 					'Entry.date1 >=' => $st_date,
 					'Entry.date1 <=' => $end_date

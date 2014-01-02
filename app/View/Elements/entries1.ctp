@@ -13,7 +13,9 @@
 			$entry['Entry']['date1'],
 			$this->Html->link($entry['Entry']['transref'],
 				array('action'=>'edit',$entry['Entry']['id'])),
-			$entry['Account']['name_chi']);
+			$this->Html->link($entry['Account']['name_chi'],
+				array('controller'=>'accounts','action'=>'view',$entry['Account']['id']))
+			);
 		$amt = $entry['Entry']['amount'];
 		if ($amt<0) 
 			array_push($ar, $this->Number->format(0-$amt, $numberOptions),'');

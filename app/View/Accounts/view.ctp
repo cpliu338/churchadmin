@@ -19,7 +19,7 @@ SCRIPT;
 		}
 		echo '</div>';
 	}
-	if (in_array($account['Account']['id'], array('11201'))) {
+	if (!empty($toggle) && in_array($account['Account']['id'], array('11201'))) {
 		echo '<div class="nav">';
 		echo $this->Html->link(__('Vet'), array('controller'=>'entries', 'action'=>'vet', $account['Account']['id']));
 		echo '</div>';
