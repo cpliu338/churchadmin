@@ -339,8 +339,29 @@ class EntriesController  extends AppController {
 			//$this->set('_serialize','entries');
 		}
 		else {
-			$this->index();
-			$this->render('index');
+			$this->set('entries', $this->Entry->find('all', array(
+				'fields'=>array("'Unbalanced' AS name",'Entry.id','Entry.date1','Entry.transref','SUM(Entry.amount) AS suma'),
+				'group'=>'Entry.transref HAVING suma<>0.0'
+			)));
+			$date1 = $this->Entry->getStartDate();
+			$this->set('entries1', $this->Entry->find('all', array(
+				'fields'=>array("'Income as DB : ' AS name",'Entry.id','Entry.date1','Entry.transref','Entry.amount','Entry.detail'),
+				'conditions' => array(
+					'Entry.date1 >=' => $this->Entry->getYearStart($date1),
+					'Entry.date1 <=' => $this->Entry->getYearEnd($date1),
+					'Account.code LIKE' => '4%',
+					'Entry.amount <'=>0
+					),
+			)));
+			$this->set('entries2', $this->Entry->find('all', array(
+				'fields'=>array("'Expenditure as CR : ' AS name",'Entry.id','Entry.date1','Entry.transref','Entry.amount','Entry.detail'),
+				'conditions' => array(
+					'Entry.date1 >=' => $this->Entry->getYearStart($date1),
+					'Entry.date1 <=' => $this->Entry->getYearEnd($date1),
+					'Account.code LIKE' => '5%',
+					'Entry.amount >'=>0
+					),
+			)));
 		}
 	}
     
