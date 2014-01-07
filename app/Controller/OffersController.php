@@ -148,101 +148,59 @@ class OffersController extends AppController {
 				))
 			);
 			$this->set('accounts', $this->Offer->Account->find('list', 
-
 				array(
-
 					'order'=>'Account.id', 
-
 					'fields'=>array('Account.id','Account.name_chi'),
-
 					'conditions'=>array('Account.code REGEXP'=>'^11.*[^0]$')
-
 					// array('Account.id <'=>20000)
-
 				)
-
 			));
-
 		}
 		else {
 			$offers = $this->Offer->find('all',
-
 					array('conditions'=>array('Offer.date1'=>$date1, 'posted'=>false),
-
 						'fields'=>array('SUM(amount) AS tot', 'account_id'),
-
 						'group'=>'account_id',
-
 						)
-
 				);
 			$this->Offer->updateAll(
-
 				array('Offer.posted'=>true),
-
-				array('Offer.date1'=>$date1, 'posted'=>false)
-
+				array('Offer.date1'=>$date1/*, 'posted'=>false*/)
 			);
 
 			$nextTransId = $this->Entry->nextTransref();
-
 			$ar = array();
 
 			//$reportdate = $this->data['Offer']['date'];
 
 			$tot = 0;
-
 			foreach ($offers as $offer) {
-
 				$ar[] = array(
-
 					'transref'=>$nextTransId,
-
 					'account_id'=>$offer['Offer']['account_id'],
-
 					'date1'=>$date1,
-
 					'amount'=>$offer[0]['tot'],
-
 					'detail'=>"Offer on $date1"
 					);
-
 				$tot -= $offer[0]['tot'];
 
 			}
-
 			$ar[] = array(
-
 					'transref'=>$nextTransId,
-
 					'account_id'=>$offer['Offer']['account_id'],
-
 					'date1'=>$date1,
-
 					'amount'=>$tot,
-
 					'detail'=>"Offer on $date1"
-
 					);
 
-			if ($this->Entry->saveAll($ar))
-
-			{
-
+			if ($this->Entry->saveAll($ar)) {
 				$this->flash('Entries have been inserted.',
-
 				array('controller'=>"entries",
-
 				'action'=>"add",$nextTransId));
-
 			}
-
 			else {
-
 				debug($this->data);
-
 			}
-
 		}
     }
 
