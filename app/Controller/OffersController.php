@@ -187,7 +187,7 @@ class OffersController extends AppController {
 			}
 			$ar[] = array(
 					'transref'=>$nextTransId,
-					'account_id'=>$offer['Offer']['account_id'],
+					'account_id'=>$this->data['Offer']['account_id'],
 					'date1'=>$date1,
 					'amount'=>$tot,
 					'detail'=>"Offer on $date1"
