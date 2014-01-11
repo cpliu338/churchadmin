@@ -400,7 +400,8 @@ class EntriesController  extends AppController {
 			throw new NotFoundException();
 		$this->set("entries", $this->Entry->find('all', array(
 			'fields' => array('Entry.amount', 'Entry.account_id', 'Entry.date1'),
-			'conditions'=>array('Entry.date1 <='=>$endDate, 'Entry.date1 >='=>'2013-01-01'),
+			'conditions'=>array('Entry.date1 <='=>$endDate, 
+				'Entry.date1 >='=>$this->Entry->getYearStart($endDate)),//'2013-01-01'),
 			'order'=>array('Entry.date1')
                 )));
         $this->set('_serialize',array('entries'));
