@@ -249,7 +249,7 @@ class EntriesController  extends AppController {
 			$this->request->data('Entry.transref',$entry['Entry']['transref']);
 			if ($this->Entry->save($this->request->data)) {
 				$this->Session->setFlash(__('The entry has been saved'));
-				$this->redirect(array('action' => 'index'));
+				$this->redirect(array('action' => 'edit',$this->Entry->id));
 			} else {
 				$this->Session->setFlash(__('The entry could not be saved. Please, try again.'));
 				$this->render('edit');
