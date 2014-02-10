@@ -17,20 +17,93 @@ class MembersController extends AppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow('admin_view');
+		$this->Auth->allow('admin_view','login2');
 	}
-	
+
 	function logout() {
 		$this->Auth->logout();
 		$this->redirect(array('controller'=>'pages','action'=>'display','home'));
 	}
-	
+
+	function login2() {
+		if ($this->request->is('post')) {
+			$ldaprdn  = 'cn=manager,ou=Internal,dc=system,dc=lan';     // ldap rdn or dn
+			$ldappass = 'jMSL5KNZtM+O8RB+';  // associated password
+			putenv('LDAPTLS_REQCERT=never');
+
+			// connect to ldap server
+			$ldapconn = @ldap_connect("ldaps://192.168.11.224",636);
+			if (!$ldapconn) {
+				$this->Session->setFlash(__('Cannot connect to directory server'));
+				$this->render('login');
+				return;
+			}
+
+			// binding to ldap server
+			$ldapbind = @ldap_bind($ldapconn, $ldaprdn, $ldappass);
+
+			// verify binding
+			if (!$ldapbind) {
+				$this->Session->setFlash(__("Cannot bind to directory server"));
+				$this->render('login');
+				return;
+			}
+			$username = $this->data['Member']['nickname'];
+
+			$dn = "dc=system,dc=lan";
+			$filter="(uid=$username)";
+			//debug($filter);
+			$justthese = array("cn", "sn", "givenname", "clearSHA1Password");
+
+			$sr=@ldap_search($ldapconn, $dn, $filter, $justthese) or die("Cannot search");
+
+			if (!$sr) {
+				$this->Session->setFlash(__("Cannot search $filter"));
+				$this->render('login');
+				return;
+			}
+			$data = @ldap_get_entries($ldapconn, $sr);
+			if (!$data || $data['count']!=1) {
+				$this->Session->setFlash(__("Cannot find $username"));
+				$this->render('login');
+				return;
+			}
+			$password = Security::hash($this->data['Member']['pwd'], 'sha1', false);
+			// 77447f779a24f225d070c6644d769f43943561ee
+			$entry = $data[0];
+			if ($entry['clearsha1password'][0] != $password) {
+				$this->Session->setFlash(__("Wrong password"));
+				$this->render('login');
+				return;
+			}
+			$member = $this->Member->findByNickname($username);
+			// debug($member);
+				// $this->render('login');
+			// return;
+			// $member = $this->Member->find('first', array('conditions' => array(
+				// 'nickname' => $username, 'pwd' => $password)));
+			if($member !== false) {
+				$this->Auth->login($member['Member']);
+				//$this->redirect(array('controller'=>'members','action'=>'index','admin'=>true));
+				$redirect = $this->Session->read('Auth.redirect');
+				$this->redirect(substr($redirect,
+					strlen($this->request->base)));
+			}
+			else {
+				$this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
+			}
+		}
+		else {
+			$this->render('login');
+		}
+	}
+
 	function login() {
 		/* cakephp's bug, still uses data['User'][...] even though userModel changed */
 		if ($this->request->is('post')) {
 			$username = $this->data['Member']['nickname'];
 			$password = Security::hash($this->data['Member']['pwd'], 'md5', false);
-	
+
 			$member = $this->Member->find('first', array('conditions' => array(
 				'nickname' => $username, 'pwd' => $password)));
 			if($member !== false) {
@@ -177,8 +250,8 @@ class MembersController extends AppController {
 	public function admin_view($id = null) {
 $help=<<<'HELP'
 /admin/members/view/?, 
-?=request, response
-auth.user, or [default] a session variable
+?=request, response,
+user, or [default] a session variable
 HELP;
 		if (preg_match('/^[0-9]+$/',$id)) {
 			if (!$this->Member->exists($id)) {
@@ -196,7 +269,7 @@ HELP;
 			else if ($id=='response') {
 				debug($this->response);
 			}
-			else if ($id=='auth.user') {
+			else if ($id=='user') {
 				debug($this->Auth->user());
 			}
 			else {
@@ -240,8 +313,8 @@ HELP;
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
 			// overwrite readonly fields
-			$this->request->data('Member.id', $member['Member']['id'])
-				->data('Member.name', $member['Member']['name']);
+			$this->request->data('Member.id', $member['Member']['id']);
+				//->data('Member.name', $member['Member']['name']);
 			// reset password?
 			if ($this->data['Member']['print']) {
 				// handled by beforeSave $password = Security::hash($this->data['Member']['pwd'], 'md5', false);
@@ -288,7 +361,7 @@ HELP;
 		$this->Session->setFlash(__('Member was not deleted'));
 		$this->redirect(array('action' => 'index'));
 	}
-	
+
 	function suggest() {
 		Configure::write('debug', 0);
 		$val =  $this->params['url']['val'];
