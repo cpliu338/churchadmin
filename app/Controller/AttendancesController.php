@@ -12,9 +12,9 @@ class AttendancesController extends AppController {
     
     public function beforeFilter() {
         parent::beforeFilter();
-        if (substr($this->request->clientIp(TRUE),0,4)==='192.')
+        if (substr($this->request->clientIp(TRUE),0,4)==='192.' || substr($this->request->clientIp(TRUE),0,4)==='127.')
 //        debug($this->Auth->user());
-            $this->Auth->Allow('index', 'toggle');
+            $this->Auth->Allow('index', 'toggle', 'barcode');
     }
     
     public function index($type=0) {
@@ -45,19 +45,7 @@ class AttendancesController extends AppController {
         	$this->autoRender = false;
         	$this->response->type('json');
             Configure::write('debug', 0);
-            //$v = $v2['Id'];
             $ret = $this->Attendance->toggle($id);
-//            $rec['Attendance']=array();
-//            $rec['Attendance']['member_id'] = $id;
-//            $t = date('Y-m-d H:i:s');
-//            $rec['Attendance']['time1'] = $t; 
-//            if ($this->Attendance->save($rec)) {
-//        	// only time portion
-//            	$result = substr($t,10);
-//            }
-//            else {
-//            	$result = "Failed";
-//            }
             if ($ret['result']=='added') {
                 $ret['oldClass']='c1';
                 $ret['newClass']='c2';
@@ -82,6 +70,58 @@ class AttendancesController extends AppController {
             $this->Attendance->deleteAll(array('Attendance.id'=>array_keys($found)));
             $this->render('index');
         }
+    }
+    
+    
+    public function barcode($code='') {
+    	$this->response->header('Refresh', '60; URL=' . 'http://'.$_SERVER['SERVER_NAME'].$this->request->here);
+			$today = date('Y-m-d');
+    		$this->set('today',$today);
+		if ($this->request->is('ajax')) {
+            Configure::write('debug', 0);
+        	$v2=$this->request->input('json_decode', true);
+        	$this->autoRender = false;
+        	$member_id=($v2['Id']-10000000)/107;
+        	$this->response->type('json');
+        	$rec = $this->Attendance->find('first',array('conditions'=>array('Member.id'=>$member_id,
+        		'Attendance.time1 LIKE'=>"$today%")
+        		));
+        	if (empty($rec)) {
+				$mem = $this->Attendance->Member->find('first',array('conditions'=>
+					array('Member.id'=>$member_id)
+        		));
+				if (empty($mem)) {
+					$ret['text']= 'Invalid';
+				}
+				else {
+					$rec = array('Attendance'=>array('member_id'=>$member_id));
+					$this->Attendance->save($rec);
+					$ret['text']= $mem['Member']['name'];
+				}
+        	}
+        	else {
+        		$ret['text']='.';//Duplicated';
+        	}
+            $json = json_encode($ret);
+            $this->response->body($json);
+    	}
+    	else {
+			if ($this->request->is('post')) {
+				$found = $this->Attendance->find('first',array('conditions'=>array('Member.id'=>$this->data['memberid'],
+					'Attendance.time1 LIKE'=>"$today%")));
+				if (!empty($found)) {
+    		    	$this->Session->setFlash("Removed ".$found['Member']['name']);
+    		    	$this->Attendance->delete($found['Attendance']['id']);
+    		    }
+    		}
+    		// GET or POST will run the following
+    			$this->set('cnt',$this->Attendance->find('count',array('conditions'=>array('Attendance.time1 LIKE'=>"$today%")))
+    				);
+				$records = $this->Attendance->find('all',array('order'=>array('Attendance.time1 DESC'),
+'conditions'=>array('Attendance.time1 LIKE'=>"$today%")));
+				$this->set('attendances', $records);
+				$this->set('base',$this->request->base);
+		}
     }
 }
 ?>

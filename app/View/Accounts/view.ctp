@@ -19,6 +19,11 @@ SCRIPT;
 		}
 		echo '</div>';
 	}
+	if (!empty($toggle) && in_array($account['Account']['id'], array('11201'))) {
+		echo '<div class="nav">';
+		echo $this->Html->link(__('Vet'), array('controller'=>'entries', 'action'=>'vet', $account['Account']['id']));
+		echo '</div>';
+	}
 	echo $this->Form->create('Entry'), 
 		$this->Form->input('date1', array('label'=>__('Since'),'type'=>'text')),
 		"</form>";

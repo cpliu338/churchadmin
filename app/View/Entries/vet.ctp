@@ -25,12 +25,23 @@ $(function() {
 			accum=accum+new Number(v.substring(index+1));//new Number(v.substring(index));
 		});
 		$("#checksum").html(accum.toFixed(2));
+		var accum2=new Number(0.0);
+		$('#cheques :not(:selected)').each(function(i,nselected)
+		{
+			var v = $(nselected).text();
+			var index=v.lastIndexOf(":");
+			accum2=accum2+new Number(v.substring(index+1));
+		});
+		$("#checksum2").html(accum2.toFixed(2));
 	}
 SCRIPT1;
     echo $this->Html->scriptBlock($script1, array('inline'=>false));
 	echo $this->Form->create('Entry');
 ?>
-<div >Checksum: <span id='checksum'>0.00</span></div>
+<div >
+	Cleared: <span id='checksum'>0.00</span><br/>
+	Signed: <span id='checksum2'><?php echo $total;?></span>
+</div>
 <select id="cheques" name='EntryId[]' multiple="multiple" style="clear:none" size='5'>
 <?php
 	foreach ($entries as $entry) {

@@ -34,7 +34,7 @@ class EntriesController  extends AppController {
     public function beforeFilter() {
         parent::beforeFilter();
         $this->set('numberOptions', $this->numberOptions);
-        $this->Auth->allowedActions=array('setNextCheque');
+        $this->Auth->allowedActions=array('setNextCheque','download');
     }
 
 	/**
@@ -108,7 +108,7 @@ class EntriesController  extends AppController {
 		$this->set('end_date',$end_date);
 		$this->paginate = array(
 			'fields' => array('Entry.id', 'Entry.transref','Entry.amount','Entry.detail','Entry.extra1',
-				'Entry.date1', 'Account.name','Account.name_chi'),
+				'Entry.date1', 'Account.name','Account.name_chi','Account.id'),
 				'conditions' => array(
 					'Entry.date1 >=' => $st_date,
 					'Entry.date1 <=' => $end_date
@@ -133,14 +133,23 @@ class EntriesController  extends AppController {
         if (!$this->Entry->Account->exists($id)) {
                 throw new NotFoundException(__('Invalid account'));
         }
-        $this->set('entries', $this->Entry->find('all',
+        $signed = $this->Entry->find('all',
             array('conditions' => array('Entry.account_id' => $id,
                     'Entry.extra1 LIKE'=>'$%'),
                 'order'=>'Entry.extra1')
-                    ));
+                    );
+        $this->set('entries', $signed);
+        /*
+            array('conditions' => array('Entry.account_id' => $id,
+                    'Entry.extra1 LIKE'=>'$%'),
+                'order'=>'Entry.extra1')
+                    )); */
+        $tot = 0;
+        foreach ($signed as $a) {
+        	$tot += $a['Entry']['amount'];
+        }
+        $this->set('total', $tot);
         if ($this->request->is('post')) {
-//            foreach ($this->data['EntryId'] as $id)
-//                debug($id);
             if (!empty($this->data['EntryId']))
                 $cnt = count($this->data['EntryId']);
             else
@@ -158,7 +167,6 @@ class EntriesController  extends AppController {
             $this->Session->setFlash(__("Updated %d entries", $cnt));
             $this->redirect(array('action'=>'vet',$id));
         }
-            //$this->set('transaction', $this->Entry->find('first', $options));
     }
 
     public function create() {
@@ -221,7 +229,7 @@ class EntriesController  extends AppController {
 			'Entry.transref'=>$transref)
 			));
         if (empty($entries)) {
-                throw new NotFoundException(__('Invalid transaction reference'));
+                throw new NotFoundException(__('Invalid entry reference'));
         }
         $this->set('options', $this->ac_types);
 		$this->set('entries', $entries);
@@ -240,10 +248,10 @@ class EntriesController  extends AppController {
 			$this->request->data('Entry.date1',$entry['Entry']['date1']);
 			$this->request->data('Entry.transref',$entry['Entry']['transref']);
 			if ($this->Entry->save($this->request->data)) {
-				$this->Session->setFlash(__('The transaction has been saved'));
-				$this->redirect(array('action' => 'index'));
+				$this->Session->setFlash(__('The entry has been saved'));
+				$this->redirect(array('action' => 'edit',$this->Entry->id));
 			} else {
-				$this->Session->setFlash(__('The transaction could not be saved. Please, try again.'));
+				$this->Session->setFlash(__('The entry could not be saved. Please, try again.'));
 				$this->render('edit');
 			}
 		}
@@ -305,7 +313,7 @@ class EntriesController  extends AppController {
 	public function delete($id = null) {
 		$this->Entry->id = $id;
 		if (!$this->Entry->exists()) {
-			throw new NotFoundException(__('Invalid transaction'));
+			throw new NotFoundException(__('Invalid entry'));
 		}
 		$this->request->onlyAllow('post', 'delete');
 		if ($this->Entry->delete()) {
@@ -331,8 +339,29 @@ class EntriesController  extends AppController {
 			//$this->set('_serialize','entries');
 		}
 		else {
-			$this->index();
-			$this->render('index');
+			$this->set('entries', $this->Entry->find('all', array(
+				'fields'=>array("'Unbalanced' AS name",'Entry.id','Entry.date1','Entry.transref','SUM(Entry.amount) AS suma'),
+				'group'=>'Entry.transref HAVING suma<>0.0'
+			)));
+			$date1 = $this->Entry->getStartDate();
+			$this->set('entries1', $this->Entry->find('all', array(
+				'fields'=>array("'Income as DB : ' AS name",'Entry.id','Entry.date1','Entry.transref','Entry.amount','Entry.detail'),
+				'conditions' => array(
+					'Entry.date1 >=' => $this->Entry->getYearStart($date1),
+					'Entry.date1 <=' => $this->Entry->getYearEnd($date1),
+					'Account.code LIKE' => '4%',
+					'Entry.amount <'=>0
+					),
+			)));
+			$this->set('entries2', $this->Entry->find('all', array(
+				'fields'=>array("'Expenditure as CR : ' AS name",'Entry.id','Entry.date1','Entry.transref','Entry.amount','Entry.detail'),
+				'conditions' => array(
+					'Entry.date1 >=' => $this->Entry->getYearStart($date1),
+					'Entry.date1 <=' => $this->Entry->getYearEnd($date1),
+					'Account.code LIKE' => '5%',
+					'Entry.amount >'=>0
+					),
+			)));
 		}
 	}
     
@@ -364,6 +393,18 @@ class EntriesController  extends AppController {
         else {
         	$this->edit($id);
         }
+	}
+	
+	public function download($endDate) {
+		if (!preg_match('/^(20\d\d)-\d{1,2}-\d{1,2}$/', $endDate, $matches))
+			throw new NotFoundException();
+		$this->set("entries", $this->Entry->find('all', array(
+			'fields' => array('Entry.amount', 'Entry.account_id', 'Entry.date1'),
+			'conditions'=>array('Entry.date1 <='=>$endDate, 
+				'Entry.date1 >='=>$this->Entry->getYearStart($endDate)),//'2013-01-01'),
+			'order'=>array('Entry.date1')
+                )));
+        $this->set('_serialize',array('entries'));
 	}
 	
 	/**

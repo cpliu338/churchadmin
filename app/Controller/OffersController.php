@@ -8,6 +8,12 @@ App::uses('AppController', 'Controller','Number');
 class OffersController extends AppController {
 
 	var $uses = array('Offer', 'Entry', 'Account', 'Member');
+	public $paginate = array(
+            'fields' => array('Offer.id', 'Offer.date1','Offer.amount', 'Offer.receipt',
+                'Member.name',
+                'Account.name_chi'),
+        'limit' => 10,
+        );
     
     public function beforeFilter() {
         parent::beforeFilter();
@@ -148,101 +154,59 @@ class OffersController extends AppController {
 				))
 			);
 			$this->set('accounts', $this->Offer->Account->find('list', 
-
 				array(
-
 					'order'=>'Account.id', 
-
 					'fields'=>array('Account.id','Account.name_chi'),
-
 					'conditions'=>array('Account.code REGEXP'=>'^11.*[^0]$')
-
 					// array('Account.id <'=>20000)
-
 				)
-
 			));
-
 		}
 		else {
 			$offers = $this->Offer->find('all',
-
 					array('conditions'=>array('Offer.date1'=>$date1, 'posted'=>false),
-
 						'fields'=>array('SUM(amount) AS tot', 'account_id'),
-
 						'group'=>'account_id',
-
 						)
-
 				);
 			$this->Offer->updateAll(
-
 				array('Offer.posted'=>true),
-
-				array('Offer.date1'=>$date1, 'posted'=>false)
-
+				array('Offer.date1'=>$date1/*, 'posted'=>false*/)
 			);
 
 			$nextTransId = $this->Entry->nextTransref();
-
 			$ar = array();
 
 			//$reportdate = $this->data['Offer']['date'];
 
 			$tot = 0;
-
 			foreach ($offers as $offer) {
-
 				$ar[] = array(
-
 					'transref'=>$nextTransId,
-
 					'account_id'=>$offer['Offer']['account_id'],
-
 					'date1'=>$date1,
-
 					'amount'=>$offer[0]['tot'],
-
 					'detail'=>"Offer on $date1"
 					);
-
 				$tot -= $offer[0]['tot'];
 
 			}
-
 			$ar[] = array(
-
 					'transref'=>$nextTransId,
-
-					'account_id'=>$offer['Offer']['account_id'],
-
+					'account_id'=>$this->data['Offer']['account_id'],
 					'date1'=>$date1,
-
 					'amount'=>$tot,
-
 					'detail'=>"Offer on $date1"
-
 					);
 
-			if ($this->Entry->saveAll($ar))
-
-			{
-
+			if ($this->Entry->saveAll($ar)) {
 				$this->flash('Entries have been inserted.',
-
 				array('controller'=>"entries",
-
 				'action'=>"add",$nextTransId));
-
 			}
-
 			else {
-
 				debug($this->data);
-
 			}
-
 		}
     }
 
@@ -268,14 +232,52 @@ class OffersController extends AppController {
         }
     }    
     /**
-     * List all offers
-     * Todo: set order, pagination options etc
+     * List all offers by receipt batch
+     * Prepare to mark for receipts
      */
     public function admin_index() {
-            $this->Offer->recursive = 0;
-            $this->set('offer', $this->paginate());
+        $receipt = array_key_exists('receipt', $this->request->query) ? $this->request->query['receipt'] : 0;
+        $this->paginate['conditions'] = array('Offer.receipt' => $receipt, 'Offer.posted'=>true);
+        $this->set('offers', $this->paginate());
+        $this->set('base', $this->request->base);
+        $this->set('option', $receipt);
+        $this->set('maxbatch', 10);
     }
-
+    
+    /**
+     * Update receipts (mark receipt batch number) for offer items with receipt = Offer[offerid].receipt
+     * @param type $mode can be 1) date1, mark receipts on or above this date
+     * 2) name, mark receipts for this name
+     * @param type $offerid The offerid from which to extract param
+     */
+    public function admin_mark($mode, $offerid) {
+            $ref = $this->Offer->findById($offerid);
+            if ($mode == 'member') {
+                $cond = array('Offer.receipt'=>$ref['Offer']['receipt'],
+                    'Member.name'=>$ref['Member']['name']);
+                $extra = 'from ' . $ref['Member']['name'];
+            }
+            else { // date
+                $cond = array('Offer.receipt'=>$ref['Offer']['receipt'],
+                    'Offer.date1 <='=>$ref['Offer']['date1']);
+                $extra = 'earlier than or on ' . $ref['Offer']['date1'];
+            }
+            $count = $this->Offer->find("count", array('conditions'=>$cond));
+            $oldbatch = $ref['Offer']['receipt'];
+        if ($this->request->is('post')) {
+            $newbatch=$this->data['Offer']['receipt'];
+            $this->Offer->updateAll(
+                array('Offer.receipt' => $newbatch),
+                $cond);
+            $this->flash("Marked $count offer items ($extra) from receipt batch $oldbatch to $newbatch", 
+                array('action'=>'index','admin'=>true,
+                    '?'=>array('receipt'=>$newbatch)    )
+            );
+        }
+        //if ($this->request->is('get')) {
+            $this->set('prompt', "Mark $count offer items ($extra) from receipt batch $oldbatch to: ");
+        //}
+    }
 }
 
 ?>
