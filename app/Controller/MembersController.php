@@ -25,7 +25,7 @@ class MembersController extends AppController {
 		$this->redirect(array('controller'=>'pages','action'=>'display','home'));
 	}
 	
-	function login2() {
+	function login() {
 		if ($this->request->is('post')) {
 			$ldaprdn  = 'cn=manager,ou=Internal,dc=system,dc=lan';     // ldap rdn or dn
 			$ldappass = 'jMSL5KNZtM+O8RB+';  // associated password
@@ -98,7 +98,7 @@ class MembersController extends AppController {
 		}
 	}
 
-	function login() {
+	function login2() {
 		/* cakephp's bug, still uses data['User'][...] even though userModel changed */
 		if ($this->request->is('post')) {
 			$username = $this->data['Member']['nickname'];
