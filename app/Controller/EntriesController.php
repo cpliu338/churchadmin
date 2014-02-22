@@ -98,7 +98,7 @@ class EntriesController  extends AppController {
 		if ($this->request->is('post')) {
 			$st_date = $this->data['Entry']['date1'];
 			$this->Entry->setStartDate($st_date);
-			//debug($this->data['Entry']['date1']);
+			$this->redirect(array('action'=>'index'));
 		}
 		else {
 			$st_date = $this->Entry->getStartDate();

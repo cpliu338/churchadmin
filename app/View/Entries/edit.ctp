@@ -81,5 +81,7 @@ SCRIPT1;
     echo $this->Form->input('detail'),
         $this->Form->hidden('extra1'),
         $this->Form->end(__('Update'));
-        $base = $this->request->base;
+	//$base = $this->request->base;
+	if ($toggle)
+		echo $this->Html->link('Admin edit',array('action'=>'edit',$this->data['Entry']['id'],'admin'=>true));
 ?>

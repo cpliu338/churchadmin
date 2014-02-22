@@ -44,8 +44,9 @@ class MembersController extends AppController {
 
 			// verify binding
 			if (!$ldapbind) {
-				$this->Session->setFlash(__("Cannot bind to directory server"));
-				$this->render('login');
+				$this->Session->setFlash(__("Cannot bind to directory server, using internal login"));
+				//$this->render('login');
+				$this->login2(); // if cannot connect ldap, try internal
 				return;
 			}
 			$username = $this->data['Member']['nickname'];
@@ -114,7 +115,7 @@ class MembersController extends AppController {
 					strlen($this->request->base)));
 			}
 			else {
-				$this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
+				$this->Session->setFlash(__('Internal DB username or password is incorrect'), 'default', array(), 'auth');
 			}
 		}
 		else {

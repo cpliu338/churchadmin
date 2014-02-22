@@ -29,4 +29,6 @@ SCRIPT2;
 		$this->Form->input('date1', array('type'=>'text'));
     echo $this->Form->input('extra1'),
         $this->Form->end(__('Update'));
+//	if ($toggle)
+	echo $this->Html->link('Normal edit',array('action'=>'edit',$this->data['Entry']['id'],'admin'=>false));
 ?>
