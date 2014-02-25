@@ -57,7 +57,7 @@ function tabEnd() {
         }
         // width=101, alt=name
         $buf .= '<td>';
-        $buf .= $this->Html->image("http://therismos.dyndns.org/photos/$memberid.jpg",
+        $buf .= $this->Html->image("http://".$_SERVER['SERVER_NAME']."/photos/$memberid.jpg",
         	array('id'=>"img$memberid",  'width'=>101, 'alt'=>$name, 'class'=>$cl)); 
         $buf .= "<span>$name</span><a class='but' href='#' id='pos$memberid'>$refresh</a><br/>";
         $buf .= "<span id='msg$memberid'>$time</span></td>";
