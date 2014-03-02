@@ -13,8 +13,18 @@ class AttendancesController extends AppController {
     public function beforeFilter() {
         parent::beforeFilter();
         if (substr($this->request->clientIp(TRUE),0,4)==='192.' || substr($this->request->clientIp(TRUE),0,4)==='127.')
-//        debug($this->Auth->user());
             $this->Auth->Allow('index', 'toggle', 'barcode');
+    }
+    
+    public function stat($cnt=10) {
+    	$at = $this->Attendance->find('all', array(
+    		'fields'=>array(
+    			"LEFT(Attendance.time1,10) as date1", 'COUNT(*) as cnt' 
+			), 'limit'=>$cnt, 'order'=>'date1 DESC',
+    		'group'=>'date1'
+		));
+        //debug($at);
+        $this->set('stat', $at);
     }
     
     public function index($type=0) {
@@ -72,6 +82,12 @@ class AttendancesController extends AppController {
         }
     }
     
+    public function show($d) {
+		$cond = array('Attendance.time1 LIKE' => "$d%");
+		$this->set('date1', $d); 
+		$this->set('items', $this->Attendance->find('all',array('conditions'=>$cond,
+			'order'=>'Attendance.time1')));
+    }
     
     public function barcode($code='') {
     	$this->response->header('Refresh', '60; URL=' . 'http://'.$_SERVER['SERVER_NAME'].$this->request->here);

@@ -6,7 +6,9 @@
 	' | ',
 	$this->Html->link(__('Members'),array('controller'=>'members','action'=>'index','admin'=>false)),
 	' | ',
-	$this->Html->link(__('Offers'),array('controller'=>'offers','action'=>'index','admin'=>false));
+	$this->Html->link(__('Offers'),array('controller'=>'offers','action'=>'index','admin'=>false)),
+	' | ',
+	$this->Html->link(__('Attendance'),array('controller'=>'attendances','action'=>'stat','admin'=>false));
 	if ($toggle) {
 		echo' | ',
 		$this->Html->link(__('Toggle admin'),array('action'=>'index','admin'=>!$this->request->admin));
