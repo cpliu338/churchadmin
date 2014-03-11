@@ -82,6 +82,15 @@ class AttendancesController extends AppController {
         }
     }
     
+    public function admin_show($d) {
+    	$query = "SELECT DISTINCT member_id, name  FROM `attendances` AS Attendance,`members` AS Member ".
+    		"WHERE Member.id=Attendance.member_id AND `time1` > DATE_SUB('$d', INTERVAL 72 DAY) AND member_id NOT IN (" .
+    		"SELECT member_id FROM `attendances` WHERE LEFT(time1,10)='$d') AND member_id<8000";
+    	$this->set('absentees', $this->Attendance->query($query));
+    	$this->set('query', $query); 
+    	$this->set('date1', $d);
+    }
+    
     public function show($d) {
 		$cond = array('Attendance.time1 LIKE' => "$d%");
 		$this->set('date1', $d); 

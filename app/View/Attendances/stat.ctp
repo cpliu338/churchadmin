@@ -12,7 +12,9 @@
         echo $this->Html->tableCells(
             array($this->Html->link($item[0]['date1'], 
             	array('action'=>'show',$item[0]['date1'])),
-            	$item[0]['cnt']
+            	$item[0]['cnt'],
+            	$this->Html->link('absentees',
+            	array('action'=>'show','admin'=>true, $item[0]['date1'])),
 			)
 		);
     }
