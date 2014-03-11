@@ -9,7 +9,8 @@
 	echo $this->Html->tableHeaders(array('nickname','name'));
 	foreach ($members as $member) {
 		echo $this->Html->tableCells(array(
-			$member['Member']['nickname'],
+			$this->Html->link($member['Member']['nickname'],
+				array('action'=>'edit','admin'=>true,$member['Member']['id'])),
 			$member['Member']['name']
 			),
 			array('class'=>''),array('class'=>'altrow'));

@@ -307,6 +307,9 @@ HELP;
  * @return void
  */
 	public function admin_edit($id = null) {
+		if (!$this->isLevelEnough(95)) {
+			throw new ForbiddenException(__('Forbidden'));
+		}
 		$options = array('conditions' => array('Member.' . $this->Member->primaryKey => $id));
 		$member = $this->Member->find('first', $options);
 		if ($this->Member==null) {//->exists($id)) {
