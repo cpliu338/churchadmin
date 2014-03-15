@@ -238,6 +238,7 @@ class OffersController extends AppController {
     public function admin_index() {
         $receipt = array_key_exists('receipt', $this->request->query) ? $this->request->query['receipt'] : 0;
         $this->paginate['conditions'] = array('Offer.receipt' => $receipt, 'Offer.posted'=>true);
+        $this->paginate['order'] = array('Offer.date1' => 'desc');
         $this->set('offers', $this->paginate());
         $this->set('base', $this->request->base);
         $this->set('option', $receipt);
