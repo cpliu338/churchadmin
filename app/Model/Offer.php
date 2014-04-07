@@ -35,7 +35,7 @@ class Offer extends AppModel {
                 'message' => 'Valid money format only'
                 ),
             'Positive' => array(
-                'rule' => array('comparison', '>', 0),
+                'rule' => array('comparison', '>=', 0),
                 'message' => 'Non negative numbers only'
             )
         ),

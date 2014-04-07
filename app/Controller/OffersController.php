@@ -65,7 +65,7 @@ class OffersController extends AppController {
 			}
 			if ($this->Offer->save($this->data)) {
 				$this->Session->setFlash(__('Saved'));
-				$this->redirect(array('controller'=>'offers','action'=>'view', $this->data['Offer']['date1']));
+				$this->redirect(array('controller'=>'offers','action'=>'view', 'admin'=>false, $this->data['Offer']['date1']));
 			}
 			else {
 			$this->populate();
