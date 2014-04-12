@@ -279,6 +279,17 @@ class OffersController extends AppController {
             $this->set('prompt', "Mark $count offer items ($extra) from receipt batch $oldbatch to: ");
         //}
     }
+    
+    public function fromMember($id) {
+        $this->set('offers',
+            $this->Offer->find('all', array(
+                'order'=>'Offer.date1 DESC',
+                'conditions'=>array('Member.id'=>$id)
+                //,'limit'=>10
+            ))
+        );
+    }
+
 }
 
 ?>

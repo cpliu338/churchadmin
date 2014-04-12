@@ -148,5 +148,15 @@ class AttendancesController extends AppController {
 				$this->set('base',$this->request->base);
 		}
     }
+    
+    public function ofMember($id) {
+        $this->set('attendances',
+            $this->Attendance->find('all', array(
+                'order'=>'Attendance.time1 DESC',
+                'conditions'=>array('Member.id'=>$id)
+                //,'limit'=>10
+            ))
+        );
+    }
 }
 ?>
