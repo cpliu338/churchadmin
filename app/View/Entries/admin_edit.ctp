@@ -30,5 +30,5 @@ SCRIPT2;
     echo $this->Form->input('extra1'),
         $this->Form->end(__('Update'));
 //	if ($toggle)
-	echo $this->Html->link('Normal edit',array('action'=>'edit',$this->data['Entry']['id'],'admin'=>false));
+	echo $this->Html->link('Normal edit',array('action'=>'edit',$entry['Entry']['id'],'admin'=>false));
 ?>
