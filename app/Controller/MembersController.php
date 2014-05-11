@@ -325,7 +325,7 @@ HELP;
 				$this->request->data('Member.pwd', $this->data['Member']['pwd']);
 			}
 			else {
-				unset($this->data['Member']['pwd']);
+				unset($this->request->data['Member']['pwd']);
 			}
 			//debug($this->request->data);
 			//return;
