@@ -17,14 +17,14 @@ class MembersController extends AppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow('admin_view','login2');
+//		$this->Auth->allow('admin_view','login2');
 	}
 
 	function logout() {
 		$this->Auth->logout();
 		$this->redirect(array('controller'=>'pages','action'=>'display','home'));
 	}
-	
+/*	
 	function login() {
 		if ($this->request->is('post')) {
 			$ldaprdn  = 'cn=manager,ou=Internal,dc=system,dc=lan';     // ldap rdn or dn
@@ -98,8 +98,8 @@ class MembersController extends AppController {
 			$this->render('login');
 		}
 	}
-
-	function login2() {
+*/
+	function login() {
 		/* cakephp's bug, still uses data['User'][...] even though userModel changed */
 		if ($this->request->is('post')) {
 			$username = $this->data['Member']['nickname'];
