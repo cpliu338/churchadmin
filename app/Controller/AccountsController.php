@@ -37,7 +37,8 @@ class AccountsController extends AppController {
             }
             $this->Account->recursive = 0;
             $this->set('accounts', $this->Account->find('all', array(
-                'conditions' => array('Account.code LIKE'=> $pattern)
+                'conditions' => array('Account.code LIKE'=> $pattern),
+                'order'=>'code'
             )));
 	}
 
