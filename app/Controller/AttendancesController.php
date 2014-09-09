@@ -106,7 +106,9 @@ class AttendancesController extends AppController {
             Configure::write('debug', 0);
         	$v2=$this->request->input('json_decode', true);
         	$this->autoRender = false;
-        	$member_id=($v2['Id']-10000000)/107;
+        	// $member_id=($v2['Id']-10000000)/107;
+   	 $raw = preg_replace('/(\d)A/', '\1\1', $v2['Id']);
+   	 $member_id=($raw-10000000)/107;
         	$this->response->type('json');
         	$rec = $this->Attendance->find('first',array('conditions'=>array('Member.id'=>$member_id,
         		'Attendance.time1 LIKE'=>"$today%")
