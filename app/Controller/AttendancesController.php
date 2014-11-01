@@ -1,5 +1,6 @@
 <?php
 App::uses('AppController', 'Controller');
+
 /**
  * Description of AttendancesController
  *
@@ -14,6 +15,32 @@ class AttendancesController extends AppController {
         parent::beforeFilter();
         if (substr($this->request->clientIp(TRUE),0,4)==='192.' || substr($this->request->clientIp(TRUE),0,4)==='127.')
             $this->Auth->Allow('index', 'toggle', 'barcode');
+    }
+    
+    public function admin_index() {
+	if (!$this->isLevelEnough(85)) {
+		throw new ForbiddenException(__('Forbidden'));
+	}
+	$this->loadModel('Entry');
+	if (!preg_match('/^(20\d\d)-\d{1,2}-\d{1,2}$/', $this->request->query['start_date'])) {
+		$today = date('Y-m-d');
+		$start_date = $this->Entry->getYearStart($today);
+	}
+	else {
+		$start_date = $this->request->query['start_date'];
+	}
+	$end_date = $this->Entry->getYearEnd($start_date);
+	$this->set('start_date', $start_date);
+	$this->set('end_date', $end_date);
+	$this->set('attendances', $this->Attendance->find('all', array(
+		'fields'=>array("Member.id", "Member.name",'COUNT(*) AS cnt'),
+		'conditions'=>array("Attendance.time1 >="=>$start_date,
+			"Attendance.time1 <="=>$end_date,
+			"Member.id <" => 8000
+			),
+		'group'=>'Member.id',
+		'order'=>'Member.id'
+	)));
     }
     
     public function stat($cnt=10) {
