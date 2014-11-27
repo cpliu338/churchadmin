@@ -6,6 +6,7 @@
 <?php
     foreach ($items as $item) {
     	echo '<li>', $item['Member']['name'], substr($item['Attendance']['time1'], 10),
+    	$item['Member']['groupname'],
     	"</li>\n";
     }
 ?>

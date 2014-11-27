@@ -122,7 +122,7 @@ class AttendancesController extends AppController {
 		$cond = array('Attendance.time1 LIKE' => "$d%");
 		$this->set('date1', $d); 
 		$this->set('items', $this->Attendance->find('all',array('conditions'=>$cond,
-			'order'=>'Attendance.time1')));
+			'order'=>'Member.groupname')));
     }
     
     public function barcode($code='') {
