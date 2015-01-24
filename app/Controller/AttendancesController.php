@@ -119,10 +119,20 @@ class AttendancesController extends AppController {
     }
     
     public function show($d) {
-		$cond = array('Attendance.time1 LIKE' => "$d%");
-		$this->set('date1', $d); 
-		$this->set('items', $this->Attendance->find('all',array('conditions'=>$cond,
-			'order'=>'Member.groupname')));
+    //debug($this->request->query);
+    	if ($this->request->query!=null && $this->request->query['sort']=='group') {
+		$order = 'Member.groupname, Attendance.time1';
+		$o = 0;
+	}
+    	else {
+    		$o = 1;
+    		$order = 'Attendance.time1';
+    	}
+	$cond = array('Attendance.time1 LIKE' => "$d%");
+	$this->set('date1', $d); 
+	$this->set('items', $this->Attendance->find('all',array('conditions'=>$cond,
+		'order'=>$order)));
+	$this->set('order', $o);
     }
     
     public function barcode($code='') {
