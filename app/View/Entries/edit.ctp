@@ -62,7 +62,7 @@ SCRIPT1;
 ?>
 <div>
     <label for="CheckSum">Check Sum</label>
-    <input readonly="readonly" maxlength="13" value="<?php echo $shortfall+$this->data['Entry']['amount'];?>" id="CheckSum"/>
+    <input readonly="readonly" maxlength="13" value="<?php echo number_format($shortfall+$this->data['Entry']['amount'],2);?>" id="CheckSum"/>
 </div>
     <select id='SpecialAccount1'>
 <?php foreach ($options as $key=>$value): ?>
