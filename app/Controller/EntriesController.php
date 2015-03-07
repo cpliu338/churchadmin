@@ -302,6 +302,52 @@ class EntriesController  extends AppController {
             $this->set(compact('accounts'));
     }
 
+    function pay() {
+        if ($this->request->is('post') || $this->request->is('put')) {
+			$entry = $this->Entry->findById($this->data['Entry']['choice']);
+			$date2 = $this->data['Entry']['date1'];
+			if ($entry) {
+				$entry['Entry']['detail'] = $this->data['Entry']['detail'];
+				$entry['Entry']['extra1'] = '$'.$this->data['Entry']['extra1'];
+				$entry['Entry']['account_id'] = '11201';
+				unset($entry['Account']);
+// NOTE updateAll does not detect field type, so need to escape for date1
+				if ($this->Entry->save($entry) &&
+					$this->Entry->updateAll(
+						array('Entry.date1'=>"'$date2'"),
+						array('Entry.transref'=>$entry['Entry']['transref'])
+					)) {
+					$this->Session->setFlash("Saved entry");
+					return $this->redirect(array('action' => 'edit', $this->data['Entry']['choice']));
+				}
+				$this->Session->setFlash("Failed to save entry");
+				debug ($entry);
+			}
+			else {
+				$choice = $this->data['Entry']['choice'];
+				$this->Session->setFlash("Invalid entry: $choice");
+			}
+        }
+	    $date1 =$this->Entry->getYearStart($this->Entry->getStartDate());
+	    $date2 = $this->Entry->getYearEnd($date1);
+	    $options = array('conditions' => array(
+			'Entry.date1 >=' => $date1,
+			'Entry.date1 <=' => $date2,
+			'Entry.account_id' => '21002',
+			'Entry.amount >'=>0
+		));
+
+		$e2 = $this->Entry->find('all', $options);
+		$es = array();
+//		if (empty($e2))
+			foreach ($e2 as $item) {
+				$ex = $item['Entry'];
+				$es[$ex['id']] = sprintf("%s ($%.2f) on %s", $ex['detail'], $ex['amount'], $ex['date1']); 
+			}
+		$this->set('entries', $es);
+		$this->request->data = $e2[0]; 
+		//$this->Entry->find('first', $options);
+    }
 /**
  * delete method
  *

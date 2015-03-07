@@ -8,6 +8,8 @@
 	' | ',
 	$this->Html->link(__('Offers'),array('controller'=>'offers','action'=>'index','admin'=>false)),
 	' | ',
+	$this->Html->link(__('Payable'),array('controller'=>'entries','action'=>'pay','admin'=>false)),
+	' | ',
 	$this->Html->link(__('Attendance'),array('controller'=>'attendances','action'=>'stat','admin'=>false));
 	if ($toggle) {
 		echo' | ',
