@@ -333,7 +333,7 @@ class EntriesController  extends AppController {
 	    $options = array('conditions' => array(
 			'Entry.date1 >=' => $date1,
 			'Entry.date1 <=' => $date2,
-			'Entry.account_id' => '21002',
+			'Entry.account_id LIKE' => '2_002',
 			'Entry.amount >'=>0
 		));
 
