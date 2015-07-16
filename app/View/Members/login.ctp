@@ -5,3 +5,6 @@
 	$this->Form->input('pwd', array('type' => 'password')),
 	$this->Form->end('Login');
 ?>
+<p>
+<?php echo $this->Html->link('Entries', 'entries/index');?>
+</p>
