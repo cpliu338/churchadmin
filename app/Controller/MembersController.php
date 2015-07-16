@@ -119,7 +119,7 @@ class MembersController extends AppController {
 			}
 		}
 		else {
-//			debug($this->request);
+			debug($this->Auth->user('id'));
 		}
 	}
 /**
