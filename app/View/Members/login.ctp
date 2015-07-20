@@ -6,5 +6,5 @@
 	$this->Form->end('Login');
 ?>
 <p>
-<?php echo $this->Html->link('Entries', 'entries/index');?>
+<?php echo $this->Html->link('Entries', ['controller'=>'entries','action'=>'index']);?>
 </p>
