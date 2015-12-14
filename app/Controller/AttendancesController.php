@@ -14,7 +14,7 @@ class AttendancesController extends AppController {
     public function beforeFilter() {
         parent::beforeFilter();
         if (substr($this->request->clientIp(TRUE),0,4)==='192.' || substr($this->request->clientIp(TRUE),0,4)==='127.')
-            $this->Auth->Allow('index', 'toggle', 'barcode');
+            $this->Auth->Allow('index', 'toggle', 'barcode', 'absentee');
     }
     
     public function admin_index() {
@@ -74,7 +74,7 @@ class AttendancesController extends AppController {
 //        debug($this->request);
     }
     
-    public function toggle() {
+    public function toggle($member_id=0) {
         if ($this->request->is('ajax')) {
         	$v2=$this->request->input('json_decode', true);
         	$id = substr($v2['Id'],3);
@@ -100,6 +100,13 @@ class AttendancesController extends AppController {
             $json = json_encode($ret);
             $this->response->body($json);
         }
+        else if ($this->request->is('post')) {
+            $ret = $this->Attendance->toggle($member_id);
+            if ($ret['result']=='added') {
+                $this->Session->setFlash("已加入");
+            }
+        	return $this->redirect(['action'=>'barcode']);
+        }
         else { // for debug use only
             $cond = array('Attendance.time1 LIKE' => substr('2013-09-03 13:00:00', 0, 10).'%',
                 'Attendance.member_id'=>34);
@@ -110,6 +117,16 @@ class AttendancesController extends AppController {
     }
     
     public function admin_show($d) {
+    	$query = "SELECT DISTINCT member_id, name  FROM `attendances` AS Attendance,`members` AS Member ".
+    		"WHERE Member.id=Attendance.member_id AND `time1` > DATE_SUB('$d', INTERVAL 72 DAY) AND member_id NOT IN (" .
+    		"SELECT member_id FROM `attendances` WHERE LEFT(time1,10)='$d') AND member_id<8000";
+    	$this->set('absentees', $this->Attendance->query($query));
+    	$this->set('query', $query); 
+    	$this->set('date1', $d);
+    }
+    
+    public function absentee() {
+    	$d = date('Y-m-d');//strftime('%Y-%m-%d'); // today
     	$query = "SELECT DISTINCT member_id, name  FROM `attendances` AS Attendance,`members` AS Member ".
     		"WHERE Member.id=Attendance.member_id AND `time1` > DATE_SUB('$d', INTERVAL 72 DAY) AND member_id NOT IN (" .
     		"SELECT member_id FROM `attendances` WHERE LEFT(time1,10)='$d') AND member_id<8000";

@@ -29,8 +29,10 @@ $this->Js->get("#barcode")->event(
     $script2);
     echo $this->Js->writeBuffer();
 ?>
-<p>
-<?php echo $this->Html->link('By photos',array('action'=>'index'));?></p>
+<nav>
+<?php echo $this->Html->link('By photos',array('action'=>'index'));?> |
+<?= $this->Html->link('Absentees',array('action'=>'absentee')) ?>
+</nav>
 <input style="width: 50%; margin-bottom:5px; background-color:#ff8" id='barcode' size='10' autofocus/>
 <div style="color: #00f; font-size:large" id='result'></div>
 <p>Total <?php echo $cnt; ?> on <?php echo $today; ?></p>
