@@ -8,6 +8,7 @@ App::uses('AppController', 'Controller','Number');
 class AccountsController extends AppController {
 	
 	public $helpers = array('Form', 'Html', 'Js', 'Totalize');
+    public $components = array('RequestHandler');
     
     public function beforeFilter() {
         parent::beforeFilter();
@@ -287,11 +288,31 @@ foreach ($raw as $acc) {
 	$hash['Text'] = $acc['Account']['name_chi'];
 	$arr[]=$hash;
 }
-debug($arr);
 $this->set('results', $arr);
 $this->set('_serialize','results');
-//		$this->layout = 'js/js1';
-		//$this->set('results',$r);
 	}
 
+	public function autocomplete() {
+ 		//Configure::write('debug', 0);
+ 		$q = $this->request->query['q'];
+        $accounts= $this->Account->find('all', array(
+			'conditions'=>array(
+				'OR' => array(
+					'Account.code'=>$q,
+					'Account.code LIKE'=>$q."_",
+					'Account.code  LIKE'=>$q."_0" // extra space after code to make this a unique index
+					),
+				'NOT'=>array('details'=>'deadmark')
+			),
+			'order'=>'code'
+		));
+		foreach ($accounts as $account) {
+			unset($hash);
+			$hash['id'] = $account['Account']['id'];
+			$hash['label'] = $account['Account']['code'] . ':' . $account['Account']['name_chi'];
+			$arr[] = $hash;
+		}
+		$this->set('results', $arr);
+		$this->set('_serialize','results');
+	}
 }

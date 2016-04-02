@@ -287,12 +287,12 @@ class EntriesController  extends AppController {
                             $this->Session->setFlash(__('The entry could not be saved. Please, try again.'));
                     }
         } 
-//                else {
 			$options = array('conditions' => array('Entry.' . $this->Entry->primaryKey => $id));
                 $this->request->data = $this->Entry->find('first', $options);
                 $this->set("entries", $this->Entry->find('all', array(
                     'conditions'=>array('Entry.transref'=>$this->data['Entry']['transref'])
                 )));
+                /*
             $accounts = $this->Entry->Account->find('list', 
 				array(
 					'order'=>'Account.id', 
@@ -300,6 +300,7 @@ class EntriesController  extends AppController {
 				)
 			);
             $this->set(compact('accounts'));
+            */
     }
 
     function pay() {
