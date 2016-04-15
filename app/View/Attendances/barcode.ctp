@@ -3,8 +3,8 @@
     echo $this->Html->script(Configure::read('Js.jquery-ui'), array('inline'=>false));
     echo $this->Html->css(Configure::read('Css.jquery-ui'), 'stylesheet', array('inline'=>false));
 $script=<<<SCRIPT
-		$('<form action="barcode" method="POST"><input type="hidden" name="memberid" value="'+
-		$(this).attr("id") + '"></form>').submit();
+		$("#member_id").val($(this).attr("id"));
+		$("#form1").submit();
 SCRIPT;
 $this->Js->get(".del")->event(
     'click',
@@ -27,7 +27,6 @@ SCRIPT2;
 $this->Js->get("#barcode")->event(
     'keyup',
     $script2);
-    echo $this->Js->writeBuffer();
 ?>
 <nav>
 <?php echo $this->Html->link('By photos',array('action'=>'index'));?> |
@@ -36,6 +35,7 @@ $this->Js->get("#barcode")->event(
 <input style="width: 50%; margin-bottom:5px; background-color:#ff8" id='barcode' size='10' autofocus/>
 <div style="color: #00f; font-size:large" id='result'></div>
 <p>Total <?php echo $cnt; ?> on <?php echo $today; ?></p>
+<form id="form1" action="barcode" method="POST"><input type="hidden" id="member_id" name="memberid" value=""/></form>
 <table style="width:400px">
 <?php
 	foreach ($attendances as $record) {
@@ -46,3 +46,6 @@ $this->Js->get("#barcode")->event(
 	}
 ?>
 </table>
+<?php 
+    echo $this->Js->writeBuffer(['inline'=>false]);
+?>

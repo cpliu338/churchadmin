@@ -7,24 +7,8 @@
 		), false);
 	echo $this->element('menu', array('toggle'=>$toggle));
         $shortfall = 0.0;
-	$url1=$this->base . '/accounts/suggest.json';
 $script1 = <<<SCRIPT1
-function commonTemplate(item) {
-    return "<option value='" + item.Value + "'>" + item.Text + "</option>"; 
-};
-function commonMatch(selectedValue) {
-	return this.When == selectedValue; 
-};
 $(document).ready(function() {
-	$("#EntryAccountId").cascade("#SpecialAccount1",
-	{
-	ajax: { 
-		url: '$url1', 
-		data: { act: 'first', val: $('#EntryAccount1').val() }
-	},				
-	template: commonTemplate,
-	match: commonMatch  			
-	});
         $('#EntryAmount').keyup(function() {
             s = Number($('#shortfall').val())+Number($('#EntryAmount').val())
             $('#CheckSum').val(s.toFixed(2));
@@ -64,16 +48,16 @@ SCRIPT1;
     <label for="CheckSum">Check Sum</label>
     <input readonly="readonly" maxlength="13" value="<?php echo number_format($shortfall+$this->data['Entry']['amount'],2);?>" id="CheckSum"/>
 </div>
-    <select id='SpecialAccount1'>
-<?php foreach ($options as $key=>$value): ?>
-    <option value='<?php echo $key;?>'><?php echo $value;?></option>
-<?php endforeach; ?>
-</select>
 <input type="hidden" value="<?php echo $shortfall;?>" id="shortfall"/>
-<?php
+Code: 1XX Assets 2XX Liabilities 4XX Income 5XX Expenses
+<?php 
+	echo '<input id="acc" value="';
+	if ($this->data['Account']['code']) {
+		echo $this->data['Account']['code'] . ':' . $this->data['Account']['name_chi'];
+	}
+	echo '"/>';
     echo $this->Html->scriptBlock($script1, array('inline'=>false));
-    echo $this->Form->input('account_id'),//array('options'=>$accounts,'id'=>'acc')),
-        //$this->Form->hidden('transref'),
+    echo $this->Form->input('account_id', ['type'=>'text','id'=>'acc2', 'readonly'=>true]),
         $this->Form->input('amount');
 ?>
     <a href="#" id="balance">balance</a>
@@ -85,3 +69,25 @@ SCRIPT1;
 	if ($toggle)
 		echo $this->Html->link('Admin edit',array('action'=>'edit',$this->data['Entry']['id'],'admin'=>true));
 ?>
+<script>
+$(function() {
+	$( "#acc" ).autocomplete({
+		source: function( request, response ) {
+		$.ajax({
+		  url: "<?=$this->base?>/accounts/autocomplete.json",
+		  dataType: "json",
+		  data: {
+			q: request.term
+		  },
+		  success: function( data ) {
+			response( data );
+		  }
+		});
+	  },
+	  minLength: 1,
+      select: function( event, ui ) {
+      	  $("#acc2").val(ui.item.id);
+      }
+	});
+});
+</script>
