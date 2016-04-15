@@ -109,7 +109,7 @@ class OffersController extends AppController {
 		$this->set('lastSunday', $this->Offer->getLastSunday());
 		$this->set('members', $this->Offer->Member->find('list', array('order'=>'Member.name','conditions'=>array('Member.id <'=>10000))));
 		$this->set('accounts', $this->Offer->Account->find('list', array('order'=>'Account.id', 'fields'=>array('Account.id','Account.name_chi'),
-			'conditions'=>array('Account.code REGEXP'=>'^41[1-9]+$'))));
+			'conditions'=>['Account.code LIKE'=>'41%', 'Account.code NOT LIKE'=>'%0'])));
 		if (empty($this->data)) {
 //			if (!$d || !preg_match('/^20\d\d\-\d\d-\d\d$/', $d))
 				$this->request->data('Offer.date1', $this->Offer->getLastSunday());
