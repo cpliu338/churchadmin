@@ -35,7 +35,7 @@ class OffersController extends AppController {
 		}
 		$this->set('members', $this->Offer->Member->find('list', array('order'=>'Member.name','conditions'=>array('Member.id <'=>10000))));
 		$this->set('accounts', $this->Offer->Account->find('list', array('order'=>'Account.id', 'fields'=>array('Account.id','Account.name_chi'),
-			'conditions'=>array('Account.code REGEXP'=>'^41[1-9]+$'))));
+			'conditions'=>['Account.code LIKE'=>'41%', 'Account.code NOT LIKE'=>'%0'])));
 		$this->set('name1', $arr);
     }
     
