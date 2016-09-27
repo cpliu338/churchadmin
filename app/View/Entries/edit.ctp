@@ -50,6 +50,7 @@ SCRIPT1;
 </div>
 <input type="hidden" value="<?php echo $shortfall;?>" id="shortfall"/>
 Code: 1XX Assets 2XX Liabilities 4XX Income 5XX Expenses
+<a href='/office2/admin/accounts' target="_new">Accounts list</a>
 <?php 
 	echo '<input id="acc" value="';
 	if ($this->data['Account']['code']) {
