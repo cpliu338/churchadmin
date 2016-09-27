@@ -215,6 +215,8 @@ class OffersController extends AppController {
             throw new NotFoundException(__('Invalid')+" $date1");
         }
         $this->set('date1', $date1);
+        $this->set('host',$_SERVER['SERVER_NAME']);
+        $this->set('port',80);
         $offers = $this->Offer->find('all', array(
         	'fields'=>array('Offer.id','Offer.posted','Offer.amount','Offer.date1',
         		'Member.name',

@@ -46,6 +46,9 @@
     ));
 ?>
 </table>
+<p>
+<a href="http://<?=$host?>:<?=$port?>/choffice/WeeklyOffer?type=xlsx&datestr=<?=$date1?>"><?=__('Weekly Report')?></a>
+</p>
 <?php if ($nUnposted > 0): ?> 
 <nav>
 <?php echo $this->Html->link(__('Post'), array('action'=>'post', $date1));?>
